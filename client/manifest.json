@@ -1,0 +1,19 @@
+{
+	"name": "Youtube Blinder",
+	"description": "Youtube Blinder",
+	"version": "1.0",
+	"manifest_version": 3,
+    "action": {
+        "service_worker": "background.js",
+        "default_popup": "popup/popup.html",
+        "default_title": "Youtube Blinder",
+        "default_icon": "icon.png"
+    },
+    "content_scripts": [
+		{
+			"matches": ["*://www.youtube.com/*"],
+			"js":  ["/contentScripts/content.js"],
+			"run_at": "document_start"
+		}
+	]
+}
