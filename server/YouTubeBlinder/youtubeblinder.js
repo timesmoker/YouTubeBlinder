@@ -1,5 +1,5 @@
 const net = require('net');
-const mysql = require('mysql');
+//const mysql = require('mysql');
 let connectionId = 0;
 /*
 const db = mysql.createConnection({
@@ -23,7 +23,7 @@ const topics = {};
 */
 const server = net.createServer((socket) => {
 
-    const currentConnectionId =connectionId++;
+    //const currentConnectionId =connectionId++;
 
     socket.on('data', (data) => {
         const req = JSON.parse(data);
@@ -38,16 +38,15 @@ const server = net.createServer((socket) => {
             socket.write(JSON.stringify({ message: 'Topic received' }));
         } else */
         if (req.path === '/data') {
-            const { title, author,  } = req.body;
+            const { title } = req.body; //안쓰는 상수 오류 떠서 제목만 남김
 
+            let response = {};
 
-            const topic = topics[ip];
+            // 30% chance to send the title back
+            if (Math.random() <= 0.3) {
+                response = { title: title };
+            }
 
-            // TODO: Validate the title and author based on the topic
-
-            const response = {
-                title: title
-            };
             socket.write(JSON.stringify(response));
         }
 
