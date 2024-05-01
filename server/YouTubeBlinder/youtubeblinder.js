@@ -1,6 +1,6 @@
 const net = require('net');
 //const mysql = require('mysql');
-let connectionId = 0;
+//let connectionId = 0;
 /*
 const db = mysql.createConnection({
     host: 'localhost',
@@ -27,7 +27,7 @@ const server = net.createServer((socket) => {
 
     socket.on('data', (data) => {
         const req = JSON.parse(data);
-        const ip = socket.remoteAddress;
+        //const ip = socket.remoteAddress;
 
       /*  if (req.path === '/topic') {
             const topic = req.body.topic;
