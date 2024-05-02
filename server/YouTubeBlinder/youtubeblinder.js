@@ -33,7 +33,7 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         let req;
         try {
-            req = JSON.parse(data.toString());
+            req = JSON.parse(data);
         } catch (error) {
             if (error instanceof SyntaxError) {
                 console.error('JSON 형식오류', data);
