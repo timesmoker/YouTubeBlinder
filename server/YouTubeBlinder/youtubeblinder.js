@@ -1,6 +1,8 @@
+import {chatgpt, detectTextFromImageUrl} from '../api/api.js';
+//import collapse from "bootstrap/js/src/collapse";
 const net = require('net');
 //const mysql = require('mysql');
-//let connectionId = 0;
+let connectionId = 0;
 /*
 const db = mysql.createConnection({
     host: 'localhost',
@@ -22,29 +24,44 @@ global.db = db;
 const topics = {};
 */
 const server = net.createServer((socket) => {
-
     //const currentConnectionId =connectionId++;
-
+    let thisid=connectionId++;
     socket.on('data', (data) => {
         const req = JSON.parse(data);
         //const ip = socket.remoteAddress;
 
-      /*  if (req.path === '/topic') {
-            const topic = req.body.topic;
+        /*  if (req.path === '/topic') {
+              const topic = req.body.topic;
 
-            topics[ip] = topic;
+              topics[ip] = topic;
 
-            // Send response
-            socket.write(JSON.stringify({ message: 'Topic received' }));
-        } else */
+              // Send response
+              socket.write(JSON.stringify({ message: 'Topic received' }));
+          } else */
         if (req.path === '/data') {
-            const { title } = req.body; //안쓰는 상수 오류 떠서 제목만 남김
+            console.log('Request from client', thisid);
+            const { title,URL } = req.body; //안쓰는 상수 오류 떠서 제목이랑 URL만 남김, 받아서 썸네일 이미지에서 제목 뽑을거임
+            const startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
+
+            console.log('연관어:');
+            console.log(chatgpt(title)); // 연관 주제 확인
+
+
+            const endTimeChatGpt = Date.now();
+            console.log('chatGPT API call 소요시간: ', endTimeChatGpt - startTimeChatGpt, 'ms');
+
+            const startTimeDetectText = Date.now();
+            console.log('썸네일 내 제목:');
+            console.log(detectTextFromImageUrl(URL)); // 썸네일 이미지에서 제목 확인
+            const endTimeDetectText = Date.now();
+            console.log('vision API call 소요시간: ', endTimeDetectText - startTimeDetectText, 'ms');
 
             let response = {};
 
             // 30% chance to send the title back
             if (Math.random() <= 0.3) {
                 response = { title: title };
+                console.log('Title:', title, 'banned');
             }
 
             socket.write(JSON.stringify(response));
@@ -54,10 +71,10 @@ const server = net.createServer((socket) => {
     });
 
     socket.on('end', () => {
-        console.log('Client disconnected');
+        console.log('Client',thisid,' disconnected');
     });
 });
 
 server.listen(2018, () => {
-    console.log('Server listening on port 2018');
+    console.log('2018포트 열려있음');
 });
