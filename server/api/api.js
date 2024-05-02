@@ -81,5 +81,5 @@ async function main() {
 //let word_relation = '나무';
 
 
-main();
+//main();
 
