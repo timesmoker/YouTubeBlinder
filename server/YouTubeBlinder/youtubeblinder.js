@@ -1,10 +1,20 @@
 
 //import collapse from "bootstrap/js/src/collapse";
 //const mysql = require('mysql');
-
+import express from 'express';
 import WebSocket,{ WebSocketServer } from 'ws';
 import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
 let connectionId = 0;
+
+const app = express();
+const server = app.listen(2018, () => {
+    console.log('HTTP server is running on port 2018');
+});
+const server2 = app.listen(3000, () => {
+    console.log('HTTP server is running on port 3000');
+});
+
+
 const wss = new WebSocketServer({ port: 2018 });
 
 /*
@@ -74,6 +84,10 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('Client', thisid, ' disconnected');
     });
+});
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
 });
 
 console.log('WebSocket server is running on port 2018');
