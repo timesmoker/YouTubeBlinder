@@ -16,7 +16,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function chatgpt(word_relation) {
+export async function chatgpt(word_relation) {
 
   try {
     const completion = await openai.chat.completions.create({
@@ -43,7 +43,7 @@ async function chatgpt(word_relation) {
     }
   }
 }
-async function detectTextFromImageUrl(imageUrl) {
+export async function detectTextFromImageUrl(imageUrl) {
   const request = {
     image: {
       source: { imageUri: imageUrl }
@@ -66,7 +66,7 @@ async function detectTextFromImageUrl(imageUrl) {
   }
 }
 
-async function main() {
+/*async function main() {
   await detectTextFromImageUrl(imageUrl);
   await chatgpt(word_relation);
 }
@@ -80,4 +80,4 @@ let word_relation = '나무';
 
 
 main();
-
+*/
