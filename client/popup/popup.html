@@ -1,12 +1,53 @@
-<html>
-    <head>
-        <style>
-            body, html { height: 100%; margin: 0; padding: 0; }
-            iframe { width: 100%; height: 100%; border: none; }
-        </style>
-    </head>
-    <body>
-        <iframe id="videoFrame" src=""></iframe>
-        <script src="popup.js"></script>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Form</title>
+    <style>
+        /* 텍스트 필드 스타일링 */
+        #textField {
+            width: 300px;   /* 너비 설정 */
+            height: 30px;   /* 높이 설정 */
+            padding: 5px;   /* 내부 여백 추가 */
+            font-size: 16px; /* 폰트 크기 */
+        }
+        /* 슬라이더 스타일링 */
+        #slider {
+            width: 300px;   /* 너비 설정 */
+        }
+    </style>
+</head>
+<body>
+    <form id="simpleForm">
+        <!-- 텍스트 필드 -->
+        <label for="textField">키워드를 입력하세요</label>
+        <input type="text" id="textField" name="name"><br><br>
+
+        <!-- 콤보박스 (드롭다운 메뉴) -->
+        <label for="comboBox">차단 강도를 선택하세요</label>
+        <select id="comboBox" name="color">
+            <option value="one">1</option>
+            <option value="two">2</option>
+            <option value="three">3</option>
+            <option value="four">4</option>
+            <option value="five">5</option>
+        </select><br><br>
+
+        <!-- 버튼 -->
+        <button type="button" onclick="submitForm()">적용</button>
+    </form>
+
+    <script>
+        function submitForm() {
+            // 텍스트 필드와 체크박스의 값을 가져옵니다.
+            var name = document.getElementById('textField').value;
+            var isAgreed = document.getElementById('checkboxField').checked;
+
+            // 콘솔에 출력합니다.
+            console.log("Name: " + name);
+            console.log("Agreed: " + isAgreed);
+        }
+    </script>
+</body>
 </html>
