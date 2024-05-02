@@ -42,7 +42,7 @@
 =======
     "content_scripts": [
 		{
-			"matches": ["*://www.youtube.com/*"],
+			"matches": ["<all_urls>"],
 			"js":  ["/contentScripts/content.js"],
 			"run_at": "document_start"
 		}
