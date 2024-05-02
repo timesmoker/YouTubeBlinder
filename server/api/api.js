@@ -29,7 +29,7 @@ export async function chatgpt(word_relation) {
         { role: "user", content: word_relation }
       ]
     });
-    let responseText = completion.choices[0].message.content;
+    return completion.choices[0].message.content;
 
 
     //출력하는 부분
@@ -57,7 +57,7 @@ export async function detectTextFromImageUrl(imageUrl) {
     //출력하는 부분
     console.log('Text:');
     if (detections.length > 0) {
-      console.log(detections[0].description); // 전체 텍스트를 출력
+      return detections[0].description; // 전체 텍스트를 출력
     } else {
       console.log('No text detected');
     }
