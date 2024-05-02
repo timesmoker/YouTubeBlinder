@@ -1,6 +1,7 @@
-import {chatgpt, detectTextFromImageUrl} from '../api/api.js';
+
 //import collapse from "bootstrap/js/src/collapse";
-const net = require('net');
+import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
+import net from 'net';
 //const mysql = require('mysql');
 let connectionId = 0;
 /*

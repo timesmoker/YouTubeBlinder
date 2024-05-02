@@ -6,7 +6,7 @@ dotenv.config();
 
 
 // 환경변수 설정: 서비스 계정 키 파일 위치
-process.env.GOOGLE_APPLICATION_CREDENTIALS = 'key\\daring-octane-421708-fdef89be9b20.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS = 'C:\\Users\\Administrator\\api\\daring-octane-421708-fdef89be9b20.json';
 
 // 클라이언트 생성
 const client = new vision.ImageAnnotatorClient();
@@ -16,7 +16,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function chatgpt(word_relation) {
+async function chatgpt(word_relation) {
 
   try {
     const completion = await openai.chat.completions.create({
@@ -29,12 +29,12 @@ export async function chatgpt(word_relation) {
         { role: "user", content: word_relation }
       ]
     });
+    let responseText = completion.choices[0].message.content;
 
 
     //출력하는 부분
-    // 아래 코드는 출력하는 코드라 임의로 return으로 바꿨음
+    // 아래 코드는 출력하는 코드라 임이
     // console.log(responseText);
-    return completion.choices[0].message.content;
   } catch (error) {
     if (error.code === 'insufficient_quota') {
       console.error("Rate limit exceeded. Please try again later.");
@@ -43,7 +43,7 @@ export async function chatgpt(word_relation) {
     }
   }
 }
-export async function detectTextFromImageUrl(imageUrl) {
+async function detectTextFromImageUrl(imageUrl) {
   const request = {
     image: {
       source: { imageUri: imageUrl }
@@ -55,10 +55,9 @@ export async function detectTextFromImageUrl(imageUrl) {
     const detections = result.textAnnotations;
 
     //출력하는 부분
-   // console.log('Text:');
+    console.log('Text:');
     if (detections.length > 0) {
-      //console.log(detections[0].description); // 전체 텍스트를 출력
-      return detections[0].description
+      console.log(detections[0].description); // 전체 텍스트를 출력
     } else {
       console.log('No text detected');
     }
@@ -67,19 +66,18 @@ export async function detectTextFromImageUrl(imageUrl) {
   }
 }
 
-//main 시험 함수 -> 어차피 안씀
-/*
 async function main() {
   await detectTextFromImageUrl(imageUrl);
   await chatgpt(word_relation);
 }
-*/
+
 
 
 // 이미지 URL
-//let imageUrl = 'https://img.youtube.com/vi/fvopu4WWcfo/0.jpg';
-//let word_relation = '나무';
+let imageUrl = 'https://img.youtube.com/vi/fvopu4WWcfo/0.jpg';
+
+let word_relation = '나무';
 
 
-//main();
+main();
 
