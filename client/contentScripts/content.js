@@ -1,7 +1,7 @@
 window.onload = function() {
 	console.log('------------------------');
 
-	const ip = "54.180.135.122";
+	const ip = "3.35.220.73";
 	const port = "2018";
 	const socket = new WebSocket(`wss://${ip}:${port}`);
 	socket.onopen = function(event) {
@@ -37,8 +37,8 @@ window.onload = function() {
 			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
 			// console.log(thumbnail);
 			json = JSON.stringify({ title: title, URL: thumbnail });
-			console.log(json);
-			// socket.current.send(json);
+			// console.log(json);
+			socket.current.send(json);
 		} catch (error) {
 			// console.log(i, "===================");
 			// console.log(error);
@@ -48,15 +48,15 @@ window.onload = function() {
 		}
 	}
 
-	// socket.onmessage = function(event) {
-	// 	console.log('Message from server ', event.data);
-	// };
+	socket.onmessage = function(event) {
+		console.log('Message from server ', event.data);
+	};
 
-	// socket.onclose = function(event) {
-	// 	console.log('Connection closed');
-	// };
+	socket.onclose = function(event) {
+		console.log('Connection closed');
+	};
 
-	// socket.onerror = function(error) {
-	// 	console.log('WebSocket Error: ' + error);
-	// };
+	socket.onerror = function(error) {
+		console.log('WebSocket Error: ' + error);
+	};
 };
