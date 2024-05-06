@@ -1,18 +1,25 @@
 
 //import collapse from "bootstrap/js/src/collapse";
 //const mysql = require('mysql');
-import express from 'express';
+
+
+import fs from 'fs';
+import https from 'https';
 import WebSocket,{ WebSocketServer } from 'ws';
 import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
 let connectionId = 0;
 
-const app = express();
-const server2 = app.listen(3000, () => {
-    console.log('HTTP server is running on port 3000');
-});
+const privateKey = fs.readFileSync('../server/Key/server.key', 'utf8');
+const certificate = fs.readFileSync('../server/Key/server.crt', 'utf8');
+const ca = fs.readFileSync('../server/Key/server.crt', 'utf8');  // 루트 CA의 인증서
 
+const credentials = { key: privateKey, cert: certificate, ca: ca };
 
-const wss = new WebSocketServer({ port: 2018 });
+// HTTPS 서버 생성
+const httpsServer = https.createServer(credentials, app);
+
+const wss = new WebSocketServer({ server: httpsServer });
+
 
 /*
 const db = mysql.createConnection({
