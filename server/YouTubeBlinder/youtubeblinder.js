@@ -5,14 +5,9 @@
 
 import fs from 'fs';
 import https from 'https';
-import WebSocket,{ WebSocketServer } from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
+import express from 'express';
 import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
-
-
-const privateKey = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.key', 'utf8');
-const certificate = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.crt', 'utf8');
-const ca = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/rootCA.crt', 'utf8');  // 루트 CA의 인증서
-
 
 const app = express();
 app.get('/', (req, res) => {
@@ -21,14 +16,25 @@ app.get('/', (req, res) => {
 
 let connectionId = 0;
 
+const privateKey = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.key', 'utf8');
+const certificate = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.crt', 'utf8');
+const ca = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/rootCA.crt', 'utf8');
 
 const credentials = { key: privateKey, cert: certificate, ca: ca };
 
-// HTTPS 서버 생성
+// HTTPS 서버 생성 및 WebSocket 서버와 연동
 const httpsServer = https.createServer(credentials, app);
-
 const wss = new WebSocketServer({ server: httpsServer });
 
+// HTTPS 서버 리스닝 시작
+httpsServer.listen(2018, () => {
+    console.log('HTTPS and WebSocket server is running on port 2018');
+});
+
+wss.on('connection', (ws) => {
+    console.log('WebSocket client connected');
+    // 추가적인 WebSocket 처리 로직
+});
 
 /*
 const db = mysql.createConnection({
