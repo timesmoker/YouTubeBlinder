@@ -275,15 +275,18 @@ class Video {
 window.onload = function() {
 	console.log('------------------------');
 
-	// const ip = "54.180.135.122";
-	// const port = "3000";
-	// const socket = new WebSocket(`ws://${ip}:${port}`);
-	// socket.onopen = function(event) {
-	// 	console.log('Connection opened');
-	// };
+	const ip = "54.180.135.122";
+	const port = "2018";
+	const socket = new WebSocket(`wss://${ip}:${port}`);
+	socket.onopen = function(event) {
+		console.log('Connection opened');
+	};
 	// get a list of Youtube videos
 	var videos = this.document.getElementsByClassName('style-scope ytd-rich-item-renderer');
 	// console.log(videos.length);
+
+	setTimeout(() => videos[0].style.display='none', 1000);
+	setTimeout(() => videos[3].style.filter = "blur(5Px)", 1000);
 
 	for (var i = 0; i < videos.length; i++) {
 		// 3 array list for each videos
