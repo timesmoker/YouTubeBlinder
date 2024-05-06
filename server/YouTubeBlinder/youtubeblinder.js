@@ -9,9 +9,10 @@ import WebSocket,{ WebSocketServer } from 'ws';
 import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
 let connectionId = 0;
 
-const privateKey = fs.readFileSync('../server/Key/server.key', 'utf8');
-const certificate = fs.readFileSync('../server/Key/server.crt', 'utf8');
-const ca = fs.readFileSync('../server/Key/server.crt', 'utf8');  // 루트 CA의 인증서
+const privateKey = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.key', 'utf8');
+const certificate = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.crt', 'utf8');
+const ca = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/rootCA.crt', 'utf8');  // 루트 CA의 인증서
+
 
 const credentials = { key: privateKey, cert: certificate, ca: ca };
 
