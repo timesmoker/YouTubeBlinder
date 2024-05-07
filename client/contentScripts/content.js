@@ -11,7 +11,7 @@ window.onload = function() {
 	var videos = this.document.getElementsByClassName('style-scope ytd-rich-item-renderer');
 	// console.log(videos.length);
 
-	setTimeout(() => videos[0].style.display='none', 1000);
+	setTimeout(() => videos[0].style.display = 'none', 1000);
 	setTimeout(() => videos[3].style.filter = "blur(5Px)", 1000);
 
 	for (var i = 0; i < videos.length; i++) {
