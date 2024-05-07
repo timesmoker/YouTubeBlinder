@@ -16,11 +16,10 @@ app.get('/', (req, res) => {
 
 let connectionId = 0;
 
-const privateKey = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.key', 'utf8');
-const certificate = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/server.crt', 'utf8');
-const ca = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/rootCA.crt', 'utf8');
+const privateKey = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/root/workspace/YouTubeBlinder/server/Key/fullchain.pem', 'utf8');
 
-const credentials = { key: privateKey, cert: certificate, ca: ca };
+const credentials = { key: privateKey, cert: certificate };
 
 // HTTPS 서버 생성 및 WebSocket 서버와 연동
 const httpsServer = https.createServer(credentials, app);
