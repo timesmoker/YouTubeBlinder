@@ -24,6 +24,7 @@
         "default_icon": "icon.png"
     },
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"background": {
 		"script": [ "background.js" ]
 	},
@@ -40,6 +41,11 @@
 			"matches": ["<all_urls>"]
 		}
 =======
+=======
+	"background": {
+		"script": [ "background.js" ]
+	},
+>>>>>>> 619b15b (15:12 cannot connect)
     "content_scripts": [
 		{
 			"matches": ["<all_urls>"],

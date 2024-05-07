@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 
+<<<<<<< HEAD
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	if (tab.url.includes("youtube.com") && changeInfo.status === 'loading') {
 		chrome.scripting.executeScript({
@@ -13,6 +14,8 @@ function redirectToCustomPage() {
 	window.location.href = 'ytblock.html';
 }
 
+=======
+>>>>>>> 619b15b (15:12 cannot connect)
 window.onload = function() {
 	console.log('------------------------');
 
