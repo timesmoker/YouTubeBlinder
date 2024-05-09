@@ -1,6 +1,4 @@
-{
-  "name": "youtubeblinder",
-  "version": "1.0.0",
+{ "version": "1.0.0",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -17,6 +15,8 @@
     "express-session": "^1.18.0",
     "memorystore": "^1.6.7",
     "mysql": "^2.18.1",
+    "word2vec": "^1.1.5",
     "ws": "^8.17.0"
   }
 }
+}                                                                                                                                                                                           }
