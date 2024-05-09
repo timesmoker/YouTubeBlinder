@@ -278,27 +278,43 @@ window.onload = function() {
 	const ip = "3.37.177.6.sslip.io";
 	const port = "2018";
 	const socket = new WebSocket(`wss://${ip}:${port}`);
-	socket.onopen = function(event) {
-		console.log('Connection opened');
-	};
 	// get a list of Youtube videos
 	var videos = this.document.getElementsByTagName('ytd-rich-grid-media');
 	// console.log(videos.length);
 
 	// setTimeout(() => videos[0].style.display = 'none', 1000);
 	// setTimeout(() => videos[3].style.filter = "blur(5Px)", 1000);
-	// if (video) {
-	// 	const parent = video.parentNode;
-	// 	video.remove();
+	var video = videos[0];
+	if (video) {
+		const parent = video.parentNode;
+		tempWidth = parent.style.width;
+		tempHeight = parent.style.height;
+		console.log(tempHeight, tempWidth);
+		video.remove();
 
-	// 	const newImage = document.createElement('img');
-	// 	newImage.src = 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGkxeDhzMXJuZGc3dHhxbGhoZ2M5ZnI5cmI3YXVjdWViM3IyOHZnaSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3o7bu3XilJ5BOiSGic/giphy.gif'; // 이미지 URL 설정
-	// 	newImage.alt = 'New Image';
-	// 	newImage.style.width = '30%';
-	// 	newImage.style.alignContent = 'center';
+		const itemDiv = document.createElement('div');
+        itemDiv.className = 'style-scope';
+		itemDiv.style.flexDirection = "column";
+        itemDiv.style.display = 'flex';
+		itemDiv.style.justifyContent = "center";
+		itemDiv.style.alignItems = "center";
+		const newImage = document.createElement('img');
+		newImage.src = 'https://upload.wikimedia.org/wikipedia/commons/a/ad/YouTube_loading_symbol_3_%28transparent%29.gif'; // 이미지 URL 설정
+		newImage.alt = 'New Image';
+		newImage.style.width = '70%';
+		newImage.style.alignContent = 'center';
+		const br = document.createElement('br');
+		const newText = document.createElement('h3');
+		newText.textContent = '서버에서 영상을 받아오는 중입니다...';
+		newText.style.textAlign = 'center';
+		newText.style.color = 'white';
 
-	// 	parent.appendChild(newImage);
-	// }
+		itemDiv.appendChild(newImage);
+		itemDiv.appendChild(newText);
+		itemDiv.style.width = tempWidth;
+		itemDiv.style.height = tempHeight;
+		parent.appendChild(itemDiv);
+	}
 	// console.log(getVideoTitle(videos[68]));
 	// setTimeout(() => video = videos[68], 3000);
 
@@ -331,6 +347,12 @@ window.onload = function() {
     }
 	*/
 
+	console.log(videos[0]);
+	temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
+	console.log(temp);
+	temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
+	console.log(temp.getElementsByTagName('a')[0].href);
+
 	console.log(videos.length);
 	var vidArr = [];
 	for (var i = 0; i < videos.length; i++) {
@@ -340,7 +362,7 @@ window.onload = function() {
 		vidArr[i] = new Video(videos[i]);
 		console.log(vidArr[i]);
 		try {
-			var thumbnail = vidArr[i].getThumbnail();
+			var thumbnail = vidArr[i].thumbnail;
 			var channel = vidArr[i].channel;
 			console.log(thumbnail);
 			console.log(channel);
@@ -359,7 +381,7 @@ window.onload = function() {
 			// console.log(thumbnail);
 			json = JSON.stringify({ title: title, URL: thumbnail });
 			// console.log(json);
-			socket.current.send(json);
+			socket.send(json);
 		} catch (error) {
 			// console.log(i, "===================");
 			// console.log(error);
@@ -369,8 +391,30 @@ window.onload = function() {
 		}
 	}
 
+	socket.onopen = function(event) {
+		console.log('Connection opened');
+		for (var i = 0; i < videos.length; i++) {
+			title = vidArr[i].title;
+			link = vidArr[i].thumblink;
+			id = link.split('=')[1];
+			// thumbnail link
+			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
+			// console.log(thumbnail);
+			json = JSON.stringify({ title: title, URL: thumbnail });
+			console.log(json);
+			socket.send(json);
+			console.log('--------------');
+		}
+	};
+
 	socket.onmessage = function(event) {
-		console.log('Message from server ', event.data);
+		var title = event.data;
+		console.log('--------Message from server----------', event.data);
+		for (var i = 0; i < videos.length; i++) {
+			if (vidArr[i].title == title) {
+
+			}
+		}
 	};
 
 	socket.onclose = function(event) {
@@ -400,12 +444,17 @@ function getVideoLink(video) {
 
 class Video {
 	constructor(video) {
+		this.title = video.getElementsByTagName('h3')[0].outerText;
 		this.thumbnail = video.getElementsByTagName('ytd-thumbnail')[0];
-		this.thumblink = this.thumbnail.getElementsByTagName('a')[0];
+		this.thumblink = this.thumbnail.getElementsByTagName('a')[0].href;
 		this.channel = video.getElementsByTagName('ytd-video-meta-block')[0].parentNode.parentNode;
 
 		function getThumbnail() {
 			return (this.thumbnail);
+		}
+
+		function getThumblink() {
+			return (this.thumblink);
 		}
 	}
 }
