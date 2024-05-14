@@ -1,9 +1,11 @@
 import OpenAI from "openai";
 import dotenv from 'dotenv';
 import vision from '@google-cloud/vision';
+import request from 'request';
+import ExtUtil from 'koalanlp/ExtUtil';
+
 
 dotenv.config();
-
 
 // 환경변수 설정: 서비스 계정 키 파일 위치
 process.env.GOOGLE_APPLICATION_CREDENTIALS = 'key\\daring-octane-421708-fdef89be9b20.json';
@@ -11,6 +13,41 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = 'key\\daring-octane-421708-fdef89be
 // 클라이언트 생성
 const client = new vision.ImageAnnotatorClient();
 
+export async function etri(analysisType, text) {
+  const openApiURL = analysisType === "written"
+      ? "http://aiopen.etri.re.kr:8000/WiseNLU"
+      : "http://aiopen.etri.re.kr:8000/WiseNLU_spoken";
+
+  const access_key = process.env.ETRI_ACCESS_KEY; // .env 파일에서 API 키 로드
+  const analysisCode = 'morp'; // 형태소 분석 코드
+
+  const requestJson = {
+      'argument': {
+          'text': text,
+          'analysis_code': analysisCode
+      }
+  };
+
+  const options = {
+      url: openApiURL,
+      body: JSON.stringify(requestJson),
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': access_key
+      }
+  };
+
+  return new Promise((resolve, reject) => {
+      request.post(options, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+              const responseBody = JSON.parse(body);
+              resolve(responseBody);
+          } else {
+              reject('Error : ' + response.statusCode + ', Body: ' + body);
+          }
+      });
+  });
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -29,9 +66,9 @@ export async function chatgpt(word_relation) {
         { role: "user", content: word_relation }
       ]
     });
-    return completion.choices[0].message.content;
+    //return completion.choices[0].message.content;
     
-    //console.log(completion.choices[0].message.content);
+    console.log(completion.choices[0].message.content);
   } catch (error) {
     if (error.code === 'insufficient_quota') {
       console.error("Rate limit exceeded. Please try again later.");
@@ -40,7 +77,6 @@ export async function chatgpt(word_relation) {
     }
   }
 }
-
 
 export async function detectTextFromImageUrl(imageUrl) {
   const request = {
@@ -89,7 +125,6 @@ export async function keyword_find(keyword) {
   return results;  // 결과 리스트 반환
   
 }
-
 
 export async function check_api(title,url,keyword) {
     let total_sum = 0;
@@ -142,7 +177,34 @@ export async function check_api(title,url,keyword) {
     }
 }
 
+export async function etri_api(text) {
+  try {
+      const morphResult = await etri('spoken', text);
+      console.log(`문장: ${morphResult.return_object.sentence[0].text}`);
+      
+      // 형태소 저장을 위한 집합 초기화 (중복 제거용)
+      let nounSet = new Set();
+      
+      // 집합을 이용하여 중복 없이 명사 저장
+      morphResult.return_object.sentence[0].morp.forEach(morp => {
+          if (morp.type === 'NNP' || morp.type === 'NNG') {
+              nounSet.add(morp.lemma);
+          }
+      });
+
+      // 집합에서 명사만 추출하여 배열로 전환
+      let nounList = Array.from(nounSet);
+
+      // 배열에 저장된 모든 명사 출력
+      console.log("명사 목록:", nounList.join(', '));
+      console.log(nounList);
+  } catch (error) {
+      console.error(error);
+  }
+}
+
 async function test1() {
+    //check_api함수 테스트
     let title = '[스페인 일상] 호주 음식 맛없다고 불평하는 호주 거주 스페인 친구에게 떡볶이를 해줬어요 음식';
     let url = 'https://img.youtube.com/vi/QPi8I_wIHCw/0.jpg';
     let keywords = ['음식','음악'];
@@ -180,9 +242,8 @@ async function test1() {
     
 }
 
-
 async function test2() {
-  
+  //keyword_find함수, 제대로 연관어가 나뉘어지는지 판단하기 위한 테스트
   let keywords = ['음식','음악'];
   let startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
   let results = await keyword_find(keywords);
@@ -199,3 +260,29 @@ async function test2() {
 
   }
 }
+
+async function test3() {
+  //그냥 또 챗지피티 하고싶어서...
+  let word = '음식';
+  let startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
+  await chatgpt(word);
+  let endTimeChatGpt = Date.now();
+  console.log('ChatGPT API call 소요시간: ', endTimeChatGpt - startTimeChatGpt, 'ms');
+  
+}
+
+async function test4() {
+  let startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
+  let text = '어떻게 릴스 한 번 찍어봐?오픈마이크 Ep.5발로란트 챔피언스 투어 퍼시픽 2024';
+  await etri_api(text);
+  let endTimeChatGpt = Date.now();
+  console.log('형태소 분석기 API call 소요시간: ', endTimeChatGpt - startTimeChatGpt, 'ms');
+  
+}
+
+async function test5() {
+  ExtUtil.alphaToHangul("갤럭시S");
+
+}
+
+test2();
