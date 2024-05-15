@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (data.htmlContent) {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
-			document.getElementById('btnSettings').remove();
+			document.getElementById('btnSettings').style.display = 'none';
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
