@@ -31,9 +31,6 @@ def receive_data():
     
     # 응답 메시지에 성공 문구와 분석 결과 추가
     response = {
-        "status": "success",
-        "message": "Connection successful",
-        "data_received": data,
         "analyzed_result": analyzed_result
     }
     
