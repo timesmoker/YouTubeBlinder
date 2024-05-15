@@ -4,10 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
 <<<<<<< HEAD
+<<<<<<< HEAD
 			document.getElementById('btnSettings').style.display = 'none';
 =======
 			document.getElementById('btnSettings').remove();
 >>>>>>> dee3602 (popup and options sync)
+=======
+			document.getElementById('btnSettings').style.display = 'none';
+>>>>>>> 1df4c3d (fix settings)
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
