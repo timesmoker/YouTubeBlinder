@@ -3,6 +3,16 @@
 	"description": "Youtube Blinder",
 	"version": "1.0",
 	"manifest_version": 3,
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": true
+	},
+	"permissions": [
+		"scripting",
+		"storage",
+		"unlimitedStorage",
+		"webRequest"
+	],
     "action": {
         "service_worker": "background.js",
         "default_popup": "popup/popup.html",
