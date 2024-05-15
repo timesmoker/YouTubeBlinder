@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Extension Options</title>
+<<<<<<< HEAD
     <style>
         /* 텍스트 필드 스타일링 */
         #textField {
@@ -28,6 +29,22 @@
             width: 600px;   /* 너비 설정 */
         }
         .button-container {
+=======
+	<style>
+        /* 텍스트 필드 스타일링 */
+        #textField {
+            width: 300px;   /* 너비 설정 */
+            height: 30px;   /* 높이 설정 */
+            padding: 5px;   /* 내부 여백 추가 */
+            font-size: 16px; /* 폰트 크기 */
+        }
+        /* 슬라이더 스타일링 */
+        #slider {
+            width: 300px;   /* 너비 설정 */
+        }
+        .button-container {
+            display: flex; /* 플렉스박스 레이아웃 사용 */
+>>>>>>> dee3602 (popup and options sync)
             flex-wrap: nowrap; /* 버튼들이 다음 줄로 넘어가지 않고 한 줄에 표시 */
             overflow-x: auto; /* 수평 스크롤 가능 */
             width: 100%; /* 버튼 영역의 너비를 최대로 설정 */
@@ -36,12 +53,20 @@
         }
         .oval-button {
             border: none;  /* 테두리 제거 */
+<<<<<<< HEAD
+=======
+            color: white;  /* 글자색 */
+>>>>>>> dee3602 (popup and options sync)
             padding: 10px 20px;  /* 상하 10px, 좌우 20px 패딩 */
             text-decoration: none;  /* 텍스트 밑줄 제거 */
             font-size: 16px;  /* 글자 크기 */
             margin: 4px 2px;  /* 마진 추가 */
             cursor: pointer;  /* 포인터 커서 사용 */
+<<<<<<< HEAD
             /* border-radius: 20px;  /* 둥근 모서리 생성 */
+=======
+            border-radius: 20px;  /* 둥근 모서리 생성 */
+>>>>>>> dee3602 (popup and options sync)
             transition: background 0.3s, color 0.3s;  /* 배경과 글자색 애니메이션 */
             flex: 0 0 auto; /* 버튼이 컨텐츠 크기에 맞춰 크기가 조정되지 않고, 축소되거나 확장도 하지 않음 */
             min-width: 80px; /* 버튼의 최소 너비 */
@@ -52,6 +77,7 @@
             text-align: center; /* 텍스트 가로 정렬 */
         }
         .red-oval {
+<<<<<<< HEAD
             /* background-color: #FF0000;  버튼의 배경색 */
         }
         .oval-button:hover {
@@ -72,10 +98,17 @@
         .toggle-button.active {
             background-color: white; /* 활성화 상태 색상 변경 */
             color: black;
+=======
+            background-color: #FF0000;  /* 버튼의 배경색 */
+        }
+        .oval-button:hover {
+            background-color: #45a049;  /* 호버 시 배경색 변경 */
+>>>>>>> dee3602 (popup and options sync)
         }
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <h1>Extension Settings</h1>
     <label for="someSetting">Some Setting:</label>
     <input type="checkbox" id="someSetting" name="someSetting">
@@ -114,6 +147,31 @@
                 <button class="oval-button word-plus">+</button>
             </div>
     </div>
+=======
+    <div>
+        <h2>YouTubeBlinder</h2>
+        <button id="btnSettings">설정</button>
+        <br>
+        <h4>추천 키워드</h4>
+    </div>
+    <button id="cloneButton">+</button>
+    <div id="buttons-area">
+        <div class="keyword-container">
+            <hr>
+            <div class="button-container">
+                <button class="oval-button word-plus">+</button>
+            </div>
+            <input type="range" class="slider" min="1" max="100" value="50">
+            <span class="sliderValue">50</span>
+        </div>
+    </div>
+    <form id="simpleForm">
+        <label for="textField">키워드를 입력하세요:</label>
+        <input type="text" id="textField" name="name"><br><br>
+
+        <button type="button" id="btnSubmit">적용</button>
+    </form>
+>>>>>>> dee3602 (popup and options sync)
     <script src="options.js"></script>
 </body>
 </html>

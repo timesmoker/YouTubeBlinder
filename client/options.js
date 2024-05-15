@@ -3,7 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (data.htmlContent) {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
+<<<<<<< HEAD
 			document.getElementById('btnSettings').style.display = 'none';
+=======
+			document.getElementById('btnSettings').remove();
+>>>>>>> dee3602 (popup and options sync)
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
@@ -12,12 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
 						const userInput = prompt("새 버튼의 텍스트를 입력하세요:", "새 버튼");
 						if (userInput) {
 							event.target.textContent = userInput;
+<<<<<<< HEAD
 							event.target.className = 'oval-button red-oval toggle-button';
+=======
+							event.target.className = 'oval-button red-oval';
+>>>>>>> dee3602 (popup and options sync)
 							const newButton = document.createElement('button');
 							newButton.textContent = '+';
 							newButton.className = 'oval-button word-plus';
 							event.target.parentNode.appendChild(newButton);
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+<<<<<<< HEAD
 								// console.log(document.body.innerHTML);
 							});
 						}
@@ -36,6 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 					if (event.target.classList.contains('container-minus')) {
 						event.target.parentNode.parentNode.remove();
+=======
+								console.log(document.body.innerHTML);
+							});
+							// const numKeywordList = splitKeywordListNum(event.target.parentNode.parentNode.className);
+							// chrome.storage.local.get('keywordList', function(result) {
+							// 	keywordList = result.keywordList;
+							// 	keywordList[numKeywordList - 1] = event.target.parentNode.parentNode;
+							// });
+							// chrome.storage.local.set({ 'keywordList': keywordList}, function() {
+							// 	console.log(keywordList);
+							// });
+						}
+>>>>>>> dee3602 (popup and options sync)
 					}
 				}
 			});
@@ -43,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (event.target.className === 'slider') {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
+<<<<<<< HEAD
 					event.target.setAttribute('value', event.target.value);
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
@@ -51,6 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			});
 
+=======
+				}
+			});
+
+			document.getElementById('btnSubmit').addEventListener('click', submitForm);
+>>>>>>> dee3602 (popup and options sync)
 			document.getElementById('btnSettings').addEventListener('click', function() {
 				chrome.tabs.create({url: 'options.html'});
 			});
@@ -58,7 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			// list plus button
 			document.getElementById('cloneButton').addEventListener('click', function() {
+<<<<<<< HEAD
 				var textFieldValue = document.getElementById('textField').value;
+=======
+>>>>>>> dee3602 (popup and options sync)
 				// 기존의 버튼 컨테이너를 선택
 				const originalContainer = document.querySelector('.keyword-container');
 
@@ -66,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const newContainer = originalContainer.cloneNode(true);
 
 				originalNum = splitKeywordListNum(originalContainer.className);
+<<<<<<< HEAD
 				newContainer.className = `keyword-container con${parseInt(originalNum)+1}`;
 				const sliderContainer = newContainer.getElementsByClassName('slider-container');
 				const buttonContainer = newContainer.getElementsByClassName('button-container');
@@ -78,6 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
 				const buttons = buttonContainer[0].querySelectorAll('button');
+=======
+				newContainer.className = `keyword-container con${originalNum+1}`;
+
+				// 복제된 컨테이너에서 모든 버튼 요소 찾기
+				const buttons = newContainer.querySelectorAll('button');
+>>>>>>> dee3602 (popup and options sync)
 
 				if (buttons.length > 1) {
 					for (let i = 0; i < buttons.length - 1; i++) {
@@ -148,6 +187,7 @@ function setKeyword(keyword) {
 	}
 }
 
+<<<<<<< HEAD
 // function submitForm() {
 // 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 // 		// `tabs[0]`은 현재 활성화된 탭을 가리킵니다.
@@ -156,6 +196,16 @@ function setKeyword(keyword) {
 // 		}
 // 	});
 // }
+=======
+function submitForm() {
+	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+		// `tabs[0]`은 현재 활성화된 탭을 가리킵니다.
+		if (tabs.length > 0) {
+			chrome.tabs.reload(tabs[0].id);
+		}
+	});
+}
+>>>>>>> dee3602 (popup and options sync)
 
 function splitKeywordListNum(str) {
 	const name = str.split(' ')[1];
@@ -163,3 +213,7 @@ function splitKeywordListNum(str) {
 	const numKeywordList = matches ? matches[0] : null;
 	return (numKeywordList);
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> dee3602 (popup and options sync)

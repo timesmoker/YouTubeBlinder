@@ -4,6 +4,9 @@
 	"version": "1.0",
 	"manifest_version": 3,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> dee3602 (popup and options sync)
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": true
@@ -12,11 +15,16 @@
 		"scripting",
 		"storage",
 		"unlimitedStorage",
+<<<<<<< HEAD
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback"
 	],
 =======
 >>>>>>> 144f325 (get title and link)
+=======
+		"webRequest"
+	],
+>>>>>>> dee3602 (popup and options sync)
     "action": {
         "service_worker": "background.js",
         "default_popup": "popup/popup.html",
