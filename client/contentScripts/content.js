@@ -11,36 +11,6 @@ window.onload = function() {
 	// setTimeout(() => videos[0].style.display = 'none', 1000);
 	// setTimeout(() => videos[3].style.filter = "blur(5Px)", 1000);
 	var video = videos[0];
-	if (video) {
-		const parent = video.parentNode;
-		tempWidth = parent.style.width;
-		tempHeight = parent.style.height;
-		console.log(tempHeight, tempWidth);
-		video.remove();
-
-		const itemDiv = document.createElement('div');
-        itemDiv.className = 'style-scope';
-		itemDiv.style.flexDirection = "column";
-        itemDiv.style.display = 'flex';
-		itemDiv.style.justifyContent = "center";
-		itemDiv.style.alignItems = "center";
-		const newImage = document.createElement('img');
-		newImage.src = 'https://upload.wikimedia.org/wikipedia/commons/a/ad/YouTube_loading_symbol_3_%28transparent%29.gif'; // 이미지 URL 설정
-		newImage.alt = 'New Image';
-		newImage.style.width = '70%';
-		newImage.style.alignContent = 'center';
-		const br = document.createElement('br');
-		const newText = document.createElement('h3');
-		newText.textContent = '서버에서 영상을 받아오는 중입니다...';
-		newText.style.textAlign = 'center';
-		newText.style.color = 'white';
-
-		itemDiv.appendChild(newImage);
-		itemDiv.appendChild(newText);
-		itemDiv.style.width = tempWidth;
-		itemDiv.style.height = tempHeight;
-		parent.appendChild(itemDiv);
-	}
 	// console.log(getVideoTitle(videos[68]));
 	// setTimeout(() => video = videos[68], 3000);
 
@@ -73,11 +43,11 @@ window.onload = function() {
     }
 	*/
 
-	console.log(videos[0]);
+	// console.log(videos[0]);
 	temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
-	console.log(temp);
+	// console.log(temp);
 	temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
-	console.log(temp.getElementsByTagName('a')[0].href);
+	// console.log(temp.getElementsByTagName('a')[0].href);
 
 	console.log(videos.length);
 	var vidArr = [];
@@ -86,13 +56,13 @@ window.onload = function() {
 		// 1st and 2nd have title and link
 		// 3rd has any 'h3' tag, so return an error
 		vidArr[i] = new Video(videos[i]);
-		console.log(vidArr[i]);
+		// console.log(vidArr[i]);
 		try {
 			var thumbnail = vidArr[i].thumbnail;
 			var channel = vidArr[i].channel;
-			console.log(thumbnail);
-			console.log(channel);
-			console.log(i, "-------------------");
+			// console.log(thumbnail);
+			// console.log(channel);
+			// console.log(i, "-------------------");
 			if (title == '') {
 				// invisible
 				// video.style.display='none';
@@ -127,29 +97,57 @@ window.onload = function() {
 			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
 			// console.log(thumbnail);
 			json = JSON.stringify({ title: title, URL: thumbnail });
-			console.log(json);
+			// console.log(json);
 			socket.send(json);
-			console.log('--------------');
+			// console.log('--------------');
 		}
 	};
 
-	socket.onmessage = function(event) {
-		var title = event.data;
-		console.log('--------Message from server----------', event.data);
-		for (var i = 0; i < videos.length; i++) {
-			if (vidArr[i].title == title) {
+	// socket.onmessage = function(event) {
+	// 	var title = JSON.parse(event.data)["title"];
+	// 	if (title) {
+	// 		for (var i = 0; i < videos.length; i++) {
+	// 			if (vidArr[i].title == title) {
+	// 				const parent = videos[i].parentNode;
+	// 				tempWidth = parent.style.width;
+	// 				tempHeight = parent.style.height;
+	// 				console.log(tempHeight, tempWidth);
+	// 				videos[i].remove();
 
-			}
-		}
-	};
+	// 				const itemDiv = document.createElement('div');
+	// 				itemDiv.className = 'style-scope';
+	// 				itemDiv.style.flexDirection = "column";
+	// 				itemDiv.style.display = 'flex';
+	// 				itemDiv.style.justifyContent = "center";
+	// 				itemDiv.style.alignItems = "center";
+	// 				const newImage = document.createElement('img');
+	// 				newImage.src = 'https://upload.wikimedia.org/wikipedia/commons/a/ad/YouTube_loading_symbol_3_%28transparent%29.gif'; // 이미지 URL 설정
+	// 				newImage.alt = 'New Image';
+	// 				newImage.style.width = '70%';
+	// 				newImage.style.alignContent = 'center';
+	// 				const br = document.createElement('br');
+	// 				const newText = document.createElement('h3');
+	// 				newText.textContent = '서버에서 영상을 받아오는 중입니다...';
+	// 				newText.style.textAlign = 'center';
+	// 				newText.style.color = 'white';
 
-	socket.onclose = function(event) {
-		console.log('Connection closed');
-	};
+	// 				itemDiv.appendChild(newImage);
+	// 				itemDiv.appendChild(newText);
+	// 				itemDiv.style.width = tempWidth;
+	// 				itemDiv.style.height = tempHeight;
+	// 				parent.appendChild(itemDiv);
+	// 			}
+	// 		}
+	// 	}
+	// };
 
-	socket.onerror = function(error) {
-		console.log('WebSocket Error: ' + error);
-	};
+	// socket.onclose = function(event) {
+	// 	console.log('Connection closed');
+	// };
+
+	// socket.onerror = function(error) {
+	// 	console.log('WebSocket Error: ' + error);
+	// };
 };
 
 function getVideoTitle(video) {
