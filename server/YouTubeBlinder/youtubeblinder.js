@@ -1,15 +1,22 @@
+/*
+CREATE TABLE video_info (
+    id VARCHAR(20) PRIMARY KEY, 영상 ID
+    name VARCHAR(150), 영상 제목
+    info VARCHAR(100)  영상 설명
+);
+*/
 
 //import collapse from "bootstrap/js/src/collapse";
 import { chatgpt, detectTextFromImageUrl } from '../api/api.js';
 import net from 'net';
-//const mysql = require('mysql');
+const mysql = require('mysql');
 let connectionId = 0;
-/*
+
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'your_username',
-    password: 'your_password',
-    database: 'your_database'
+    user: 'myuser',
+    password: 'Myp@ssw0rd123!',
+    database: 'video_data'
 });
 
 db.connect((err) => {
@@ -23,7 +30,7 @@ global.db = db;
 
 // Store topics by user IP
 const topics = {};
-*/
+
 const server = net.createServer((socket) => {
     //const currentConnectionId =connectionId++;
     let thisid=connectionId++;
@@ -40,6 +47,19 @@ const server = net.createServer((socket) => {
               socket.write(JSON.stringify({ message: 'Topic received' }));
           } else */
         if (req.path === '/data') {
+
+            
+            const insertDataQuery = 'INSERT INTO video_info (id, name, info) VALUES (?, ?, ?)';
+
+            db.query(insertDataQuery, [video_id, title, info], (err, result) => {
+                if (err) {
+                    throw err;
+                }
+                //console.log('Data inserted with ID:', result.insertId);
+            });
+
+
+
             console.log('Request from client', thisid);
             const { title,URL } = req.body; //안쓰는 상수 오류 떠서 제목이랑 URL만 남김, 받아서 썸네일 이미지에서 제목 뽑을거임
             const startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
