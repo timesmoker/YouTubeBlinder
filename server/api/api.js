@@ -126,6 +126,15 @@ export async function keyword_find(keyword) {
   
 }
 
+// blocktype T => Max Simillarity F=> Total Simiilarity
+export function blindSim(maxSim, totalSim, threshold, blockType) {
+    if (blockType === true) {
+        return maxSim >= threshold;
+    } else {
+        return totalSim >= threshold;
+    }
+}
+
 export async function check_api(title,url,keyword) {
     let total_sum = 0;
 
