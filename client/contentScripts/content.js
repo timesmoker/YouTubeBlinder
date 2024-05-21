@@ -1,5 +1,8 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3fcc778 (popup)
 // document.documentElement.style.visibility = 'hidden';  // 초기에 전체 페이지를 숨깁니다.
 
 // const customHtmlUrl = chrome.runtime.getURL("ytblock.html");
@@ -64,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		blocker.style.display = 'none';
 		});
 	}
+<<<<<<< HEAD
 	console.log('------------------------');
 
 	const ip = "3.37.177.6.sslip.io";
@@ -273,6 +277,8 @@ class Video {
 =======
 >>>>>>> cccf40f (get thumbnail link)
 window.onload = function() {
+=======
+>>>>>>> 3fcc778 (popup)
 	console.log('------------------------');
 
 	const ip = "3.37.177.6.sslip.io";
@@ -318,9 +324,9 @@ window.onload = function() {
 	*/
 
 	// console.log(videos[0]);
-	temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
+	// temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
 	// console.log(temp);
-	temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
+	// temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
 	// console.log(temp.getElementsByTagName('a')[0].href);
 
 	console.log(videos.length);
@@ -377,6 +383,17 @@ window.onload = function() {
 		}
 	};
 
+	socket.onmessage = function(event) {
+		var title = JSON.parse(event.data)["title"];
+		if (title) {
+			console.log(title);
+		}
+	}
+
+	socket.onclose = function(event) {
+		console.log('close: ', event);
+	}
+
 	// socket.onmessage = function(event) {
 	// 	var title = JSON.parse(event.data)["title"];
 	// 	if (title) {
@@ -422,10 +439,14 @@ window.onload = function() {
 	// socket.onerror = function(error) {
 	// 	console.log('WebSocket Error: ' + error);
 	// };
+<<<<<<< HEAD
 };
 <<<<<<< HEAD
 >>>>>>> 144f325 (get title and link)
 =======
+=======
+});
+>>>>>>> 3fcc778 (popup)
 
 function getVideoTitle(video) {
 	if (video) {

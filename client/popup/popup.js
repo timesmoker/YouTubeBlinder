@@ -8,9 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
 <<<<<<< HEAD
+<<<<<<< HEAD
 			document.getElementById('btnSettings').style.display = 'block';
 =======
 >>>>>>> dee3602 (popup and options sync)
+=======
+			document.getElementById('btnSettings').style.display = 'block';
+>>>>>>> 3fcc778 (popup)
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
@@ -51,14 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
 =======
 								console.log(document.body.innerHTML);
 							});
-							// const numKeywordList = splitKeywordListNum(event.target.parentNode.parentNode.className);
-							// chrome.storage.local.get('keywordList', function(result) {
-							// 	keywordList = result.keywordList;
-							// 	keywordList[numKeywordList - 1] = event.target.parentNode.parentNode;
-							// });
-							// chrome.storage.local.set({ 'keywordList': keywordList}, function() {
-							// 	console.log(keywordList);
-							// });
+						}
+						else {
+							event.target.parentNode.parentNode.remove();
 						}
 >>>>>>> dee3602 (popup and options sync)
 					}
@@ -69,15 +68,27 @@ document.addEventListener('DOMContentLoaded', () => {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
 <<<<<<< HEAD
+<<<<<<< HEAD
 					event.target.setAttribute('value', event.target.value);
+=======
+					console.log(event.target.value);
+					const slider = this.getElementsByClassName('slider');
+					console.log(slider[0]);
+					console.log(event.target);
+					slider[0].value = event.target.value;
+					console.log(slider[0]);
+>>>>>>> 3fcc778 (popup)
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 						// console.log(document.body.innerHTML);
 					});
+<<<<<<< HEAD
 				}
 			});
 
 =======
+=======
+>>>>>>> 3fcc778 (popup)
 				}
 			});
 
@@ -217,6 +228,7 @@ function splitKeywordListNum(str) {
 	return (numKeywordList);
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 // document.addEventListener('DOMContentLoaded', function() {
 //   chrome.storage.local.get(['videos'], function(result) {
@@ -236,3 +248,5 @@ function splitKeywordListNum(str) {
 =======
 
 >>>>>>> dee3602 (popup and options sync)
+=======
+>>>>>>> 3fcc778 (popup)

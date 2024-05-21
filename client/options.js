@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
 <<<<<<< HEAD
+<<<<<<< HEAD
 					event.target.setAttribute('value', event.target.value);
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
@@ -79,6 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 
 =======
+=======
+
+					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+						console.log(document.body.innerHTML);
+					});
+>>>>>>> 3fcc778 (popup)
 				}
 			});
 
