@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (data.htmlContent) {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
+			document.getElementById('btnSettings').style.display = 'block';
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
@@ -19,14 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 								console.log(document.body.innerHTML);
 							});
-							// const numKeywordList = splitKeywordListNum(event.target.parentNode.parentNode.className);
-							// chrome.storage.local.get('keywordList', function(result) {
-							// 	keywordList = result.keywordList;
-							// 	keywordList[numKeywordList - 1] = event.target.parentNode.parentNode;
-							// });
-							// chrome.storage.local.set({ 'keywordList': keywordList}, function() {
-							// 	console.log(keywordList);
-							// });
+						}
+						else {
+							event.target.parentNode.parentNode.remove();
 						}
 					}
 				}
@@ -35,6 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (event.target.className === 'slider') {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
+					console.log(event.target.value);
+					const slider = this.getElementsByClassName('slider');
+					console.log(slider[0]);
+					console.log(event.target);
+					slider[0].value = event.target.value;
+					console.log(slider[0]);
+
+					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+						// console.log(document.body.innerHTML);
+					});
 				}
 			});
 
@@ -142,4 +148,3 @@ function splitKeywordListNum(str) {
 	const numKeywordList = matches ? matches[0] : null;
 	return (numKeywordList);
 }
-

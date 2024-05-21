@@ -11,7 +11,8 @@
 		"scripting",
 		"storage",
 		"unlimitedStorage",
-		"webRequest"
+		"declarativeNetRequest",
+		"declarativeNetRequestFeedback"
 	],
     "action": {
         "service_worker": "background.js",
@@ -24,9 +25,15 @@
 	},
     "content_scripts": [
 		{
-			"matches": ["<all_urls>"],
+			"matches": ["*://*.youtube.com/*"],
 			"js":  ["/contentScripts/content.js"],
 			"run_at": "document_start"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["ytblock.html"],
+			"matches": ["<all_urls>"]
 		}
 	]
 }

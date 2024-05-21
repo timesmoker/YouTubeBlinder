@@ -1,4 +1,67 @@
-window.onload = function() {
+// document.documentElement.style.visibility = 'hidden';  // 초기에 전체 페이지를 숨깁니다.
+
+// const customHtmlUrl = chrome.runtime.getURL("ytblock.html");
+// fetch(customHtmlUrl)
+// 	.then(response => response.text())
+// 	.then(html => {
+// 	document.write(html);
+
+//     // YouTube 콘텐츠 로딩 완료 후 원래 콘텐츠 표시
+//     window.addEventListener('load', function() {
+//         customPage.style.display = 'none';  // 사용자 지정 페이지를 숨깁니다.
+//         document.documentElement.style.visibility = '';  // 원래 페이지 콘텐츠를 다시 표시합니다.
+//     });
+// }).catch(error => {
+//     console.error('Failed to fetch the custom HTML:', error);
+// });
+
+// window.addEventListener('load', function() {
+	// const videoPlayer = document.getElementById('contents');
+	// console.log(videoPlayer);
+	// if (videoPlayer) {
+	// 	// 비디오 플레이어 숨기기
+	// 	videoPlayer.style.display = 'none';
+
+	// 	// 사용자 정의 이미지 및 메시지 삽입
+	// 	const blocker = document.createElement('div');
+	// 	blocker.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+	// 	<img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" alt="Blocked Video" style="max-width: 100%; height: auto;">
+	// 	<p>This video is blocked. Click the button below to watch the video.</p>
+	// 	<button id="unblockButton">Watch Video</button>
+	// 	</div>`;
+	// 	videoPlayer.parentNode.insertBefore(blocker, videoPlayer);
+
+	// 	// 버튼 클릭 이벤트 핸들러
+	// 	document.getElementById('unblockButton').addEventListener('click', function() {
+	// 	videoPlayer.style.display = '';
+	// 	blocker.style.display = 'none';
+	// 	});
+	// }
+// });
+
+document.addEventListener('DOMContentLoaded', () => {
+	console.log(document.innerHTML);
+	const videoPlayer = document.getElementById('contents');
+	console.log(videoPlayer);
+	if (videoPlayer) {
+		// 비디오 플레이어 숨기기
+		videoPlayer.style.display = 'none';
+
+		// 사용자 정의 이미지 및 메시지 삽입
+		const blocker = document.createElement('div');
+		blocker.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+		<img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" alt="Blocked Video" style="max-width: 100%; height: auto;">
+		<p>This video is blocked. Click the button below to watch the video.</p>
+		<button id="unblockButton">Watch Video</button>
+		</div>`;
+		videoPlayer.parentNode.insertBefore(blocker, videoPlayer);
+
+		// 버튼 클릭 이벤트 핸들러
+		document.getElementById('unblockButton').addEventListener('click', function() {
+		videoPlayer.style.display = '';
+		blocker.style.display = 'none';
+		});
+	}
 	console.log('------------------------');
 
 	const ip = "3.37.177.6.sslip.io";
@@ -44,9 +107,9 @@ window.onload = function() {
 	*/
 
 	// console.log(videos[0]);
-	temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
+	// temp = videos[0].getElementsByTagName('ytd-thumbnail')[0];
 	// console.log(temp);
-	temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
+	// temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
 	// console.log(temp.getElementsByTagName('a')[0].href);
 
 	console.log(videos.length);
@@ -103,6 +166,17 @@ window.onload = function() {
 		}
 	};
 
+	socket.onmessage = function(event) {
+		var title = JSON.parse(event.data)["title"];
+		if (title) {
+			console.log(title);
+		}
+	}
+
+	socket.onclose = function(event) {
+		console.log('close: ', event);
+	}
+
 	// socket.onmessage = function(event) {
 	// 	var title = JSON.parse(event.data)["title"];
 	// 	if (title) {
@@ -148,7 +222,7 @@ window.onload = function() {
 	// socket.onerror = function(error) {
 	// 	console.log('WebSocket Error: ' + error);
 	// };
-};
+});
 
 function getVideoTitle(video) {
 	if (video) {
