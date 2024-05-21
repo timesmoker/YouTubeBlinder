@@ -18,6 +18,9 @@ def analyze_text(text):
     if tagger is None:
         create_tagger()
 
+    # 작은따옴표 제거
+    text = text.replace("'", "")
+
     exclude_tags = {'JX', 'SF'}
     result_list = []
 

@@ -7,12 +7,12 @@ def first_connect_sql():
     global conn
     conn = pymysql.connect(host='localhost', user='root', password='NewP@ssw0rd!', db='youtube_data', charset='utf8mb4')
 
-def insert_data(id, title):
+def insert_data(video_id, video_title):
     cur = conn.cursor()
     try:
         # 데이터 삽입
-        insert_query = "INSERT INTO today_data (id, title) VALUES (%s, %s)"
-        cur.execute(insert_query, (id, title))
+        insert_query = "INSERT INTO today_data (video_id, video_title) VALUES (%s, %s)"
+        cur.execute(insert_query, (video_id, video_title))
         conn.commit()
     except Exception as e:
         print(f"Error inserting into today_data: {e}")
@@ -26,21 +26,22 @@ def insert_data(id, title):
         count = result[0]
     
         if count == 0:
-            info = take_info(id)
+            #이건 영상 설명 따오는 함수(필요없으면 날려도 됌)
+            video_info = take_info(video_id)
 
             if info:
                 # ID가 존재하지 않으면 데이터를 삽입
                 try:
-                    insert_query_title = "INSERT INTO learn_title (id, title) VALUES (%s, %s)"
-                    cur.execute(insert_query_title, (id, title))
+                    insert_query_title = "INSERT INTO learn_title (video_id, video_title) VALUES (%s, %s)"
+                    cur.execute(insert_query_title, (video_id, video_title))
                     conn.commit()
                 except Exception as e:
                     print(f"Error inserting into learn_title: {e}")
                     conn.rollback()
 
                 try:
-                    insert_query_info = "INSERT INTO learn_info (id, info) VALUES (%s, %s)"
-                    cur.execute(insert_query_info, (id, info))
+                    insert_query_info = "INSERT INTO learn_info (video_id, video_info) VALUES (%s, %s)"
+                    cur.execute(insert_query_info, (video_id, video_info))
                     conn.commit()
                 except Exception as e:
                     print(f"Error inserting into learn_info: {e}")
@@ -55,7 +56,7 @@ def insert_data(id, title):
     finally:
         cur.close()
 
-def take_info(id):
+def take_info(video_id):
     try:
         # YouTube API 서비스 객체 생성
         print(f"Retrieving info for id={id} from YouTube API")
@@ -64,7 +65,7 @@ def take_info(id):
         # 영상 정보를 가져오는 API 요청
         request = youtube.videos().list(
             part='snippet',
-            id=id
+            video_id=video_id
         )
         response = request.execute()
 

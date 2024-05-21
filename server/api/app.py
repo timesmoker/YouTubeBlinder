@@ -1,8 +1,17 @@
 from flask import Flask, request, Response
 import json
-import def_koalanlp as nlp
 import threading
-import def_sql as sql
+import mypackage.def_koalanlp as nlp
+import mypackage.def_sql as sql
+import mypackage.def_visionai as visionapi
+
+import pymysql
+from googleapiclient.discovery import build
+
+from google.cloud import vision
+import io
+import requests
+
 
 app = Flask(__name__)
 
@@ -29,11 +38,15 @@ def receive_data():
         print("Received data:", data)
 
         # JSON으로 받은 데이터 분리작업 (임시)
-        id = data.get('id')
-        title = data.get('title')
+        video_id = data.get('video_id')
+        video_title = data.get('video_title')
 
+        #vision ai로 url을 보내서 썸네일 분석
+        test1 = visionapi.extract_text_from_thumbnail(video_id)
+        print(test1)
         # sql에 저장하는 작업
-        sql.insert_data(id, title)
+        sql.insert_data(video_id, video_title)
+
 
         '''
         # 형태소 분석 수행 (수정예정)
