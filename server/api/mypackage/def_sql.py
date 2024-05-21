@@ -11,7 +11,7 @@ def insert_data(video_id, video_title):
     cur = conn.cursor()
     try:
         # 데이터 삽입
-        insert_query = "INSERT INTO today_data (video_id, video_title) VALUES (%s, %s)"
+        insert_query = "INSERT INTO today_data (id, title) VALUES (%s, %s)"
         cur.execute(insert_query, (video_id, video_title))
         conn.commit()
     except Exception as e:
@@ -32,7 +32,7 @@ def insert_data(video_id, video_title):
             if info:
                 # ID가 존재하지 않으면 데이터를 삽입
                 try:
-                    insert_query_title = "INSERT INTO learn_title (video_id, video_title) VALUES (%s, %s)"
+                    insert_query_title = "INSERT INTO learn_title (id, title) VALUES (%s, %s)"
                     cur.execute(insert_query_title, (video_id, video_title))
                     conn.commit()
                 except Exception as e:
@@ -40,7 +40,7 @@ def insert_data(video_id, video_title):
                     conn.rollback()
 
                 try:
-                    insert_query_info = "INSERT INTO learn_info (video_id, video_info) VALUES (%s, %s)"
+                    insert_query_info = "INSERT INTO learn_info (id, info) VALUES (%s, %s)"
                     cur.execute(insert_query_info, (video_id, video_info))
                     conn.commit()
                 except Exception as e:

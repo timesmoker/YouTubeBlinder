@@ -5,14 +5,6 @@ import mypackage.def_koalanlp as nlp
 import mypackage.def_sql as sql
 import mypackage.def_visionai as visionapi
 
-import pymysql
-from googleapiclient.discovery import build
-
-from google.cloud import vision
-import io
-import requests
-
-
 app = Flask(__name__)
 
 # 초기화를 위한 플래그와 락 객체 생성
@@ -38,15 +30,14 @@ def receive_data():
         print("Received data:", data)
 
         # JSON으로 받은 데이터 분리작업 (임시)
-        video_id = data.get('video_id')
-        video_title = data.get('video_title')
+        video_id = data.get('id')
+        video_title = data.get('title')
 
-        #vision ai로 url을 보내서 썸네일 분석
+        # Vision AI로 URL을 보내서 썸네일 분석
         test1 = visionapi.extract_text_from_thumbnail(video_id)
-        print(test1)
-        # sql에 저장하는 작업
+        
+        # SQL에 저장하는 작업
         sql.insert_data(video_id, video_title)
-
 
         '''
         # 형태소 분석 수행 (수정예정)

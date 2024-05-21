@@ -1,6 +1,9 @@
 from google.cloud import vision
 import io
 import requests
+import os
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/ec2-user/daring.json"
 
 def detect_text_from_image_url(url):
     client = vision.ImageAnnotatorClient()
