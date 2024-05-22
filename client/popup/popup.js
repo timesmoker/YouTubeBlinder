@@ -24,15 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (userInput) {
 							event.target.textContent = userInput;
 <<<<<<< HEAD
+<<<<<<< HEAD
 							event.target.className = 'oval-button red-oval toggle-button';
 =======
 							event.target.className = 'oval-button red-oval';
 >>>>>>> dee3602 (popup and options sync)
+=======
+							event.target.className = 'oval-button red-oval toggle-button';
+>>>>>>> d244c07 (draft UI)
 							const newButton = document.createElement('button');
 							newButton.textContent = '+';
 							newButton.className = 'oval-button word-plus';
 							event.target.parentNode.appendChild(newButton);
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+<<<<<<< HEAD
 <<<<<<< HEAD
 								// console.log(document.body.innerHTML);
 							});
@@ -54,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 						event.target.parentNode.parentNode.remove();
 =======
 								console.log(document.body.innerHTML);
+=======
+								// console.log(document.body.innerHTML);
+>>>>>>> d244c07 (draft UI)
 							});
 						}
 						else {
@@ -61,12 +69,25 @@ document.addEventListener('DOMContentLoaded', () => {
 						}
 >>>>>>> dee3602 (popup and options sync)
 					}
+					if (event.target.classList.contains('toggle-button')) {
+						event.target.classList.toggle('active');
+						var isActive = this.classList.contains('active');
+						console.log('토글 상태:', isActive ? '활성화' : '비활성화');
+						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+							// console.log(document.body.innerHTML);
+						});
+					}
+
+					if (event.target.classList.contains('container-minus')) {
+						event.target.parentNode.parentNode.remove();
+					}
 				}
 			});
 			buttonsArea.addEventListener('input', function(event) {
 				if (event.target.className === 'slider') {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 					event.target.setAttribute('value', event.target.value);
@@ -78,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					slider[0].value = event.target.value;
 					console.log(slider[0]);
 >>>>>>> 3fcc778 (popup)
+=======
+					event.target.setAttribute('value', event.target.value);
+>>>>>>> d244c07 (draft UI)
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 						// console.log(document.body.innerHTML);
@@ -92,8 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			});
 
+<<<<<<< HEAD
 			document.getElementById('btnSubmit').addEventListener('click', submitForm);
 >>>>>>> dee3602 (popup and options sync)
+=======
+>>>>>>> d244c07 (draft UI)
 			document.getElementById('btnSettings').addEventListener('click', function() {
 				chrome.tabs.create({url: 'options.html'});
 			});
@@ -102,9 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			// list plus button
 			document.getElementById('cloneButton').addEventListener('click', function() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				var textFieldValue = document.getElementById('textField').value;
 =======
 >>>>>>> dee3602 (popup and options sync)
+=======
+				var textFieldValue = document.getElementById('textField').value;
+>>>>>>> d244c07 (draft UI)
 				// 기존의 버튼 컨테이너를 선택
 				const originalContainer = document.querySelector('.keyword-container');
 
@@ -113,6 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				originalNum = splitKeywordListNum(originalContainer.className);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d244c07 (draft UI)
 				newContainer.className = `keyword-container con${parseInt(originalNum)+1}`;
 				const sliderContainer = newContainer.getElementsByClassName('slider-container');
 				const buttonContainer = newContainer.getElementsByClassName('button-container');
@@ -122,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				tempButton[0].textContent = "-";
 				tempButton[1].className = "oval-button red-oval";
 				tempButton[1].textContent = textFieldValue;
+<<<<<<< HEAD
 
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
 				const buttons = buttonContainer[0].querySelectorAll('button');
@@ -131,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
 				const buttons = newContainer.querySelectorAll('button');
 >>>>>>> dee3602 (popup and options sync)
+=======
+
+				// 복제된 컨테이너에서 모든 버튼 요소 찾기
+				const buttons = buttonContainer[0].querySelectorAll('button');
+>>>>>>> d244c07 (draft UI)
 
 				if (buttons.length > 1) {
 					for (let i = 0; i < buttons.length - 1; i++) {
@@ -202,6 +242,9 @@ function setKeyword(keyword) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d244c07 (draft UI)
 // function submitForm() {
 // 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 // 		// `tabs[0]`은 현재 활성화된 탭을 가리킵니다.
@@ -210,6 +253,7 @@ function setKeyword(keyword) {
 // 		}
 // 	});
 // }
+<<<<<<< HEAD
 =======
 function submitForm() {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -220,6 +264,8 @@ function submitForm() {
 	});
 }
 >>>>>>> dee3602 (popup and options sync)
+=======
+>>>>>>> d244c07 (draft UI)
 
 function splitKeywordListNum(str) {
 	const name = str.split(' ')[1];
