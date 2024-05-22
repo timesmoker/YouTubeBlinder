@@ -12,18 +12,30 @@ document.addEventListener('DOMContentLoaded', () => {
 						const userInput = prompt("새 버튼의 텍스트를 입력하세요:", "새 버튼");
 						if (userInput) {
 							event.target.textContent = userInput;
-							event.target.className = 'oval-button red-oval';
+							event.target.className = 'oval-button red-oval toggle-button';
 							const newButton = document.createElement('button');
 							newButton.textContent = '+';
 							newButton.className = 'oval-button word-plus';
 							event.target.parentNode.appendChild(newButton);
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-								console.log(document.body.innerHTML);
+								// console.log(document.body.innerHTML);
 							});
 						}
 						else {
 							event.target.parentNode.parentNode.remove();
 						}
+					}
+					if (event.target.classList.contains('toggle-button')) {
+						event.target.classList.toggle('active');
+						var isActive = this.classList.contains('active');
+						console.log('토글 상태:', isActive ? '활성화' : '비활성화');
+						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+							// console.log(document.body.innerHTML);
+						});
+					}
+
+					if (event.target.classList.contains('container-minus')) {
+						event.target.parentNode.parentNode.remove();
 					}
 				}
 			});
@@ -31,12 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (event.target.className === 'slider') {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
-					console.log(event.target.value);
-					const slider = this.getElementsByClassName('slider');
-					console.log(slider[0]);
-					console.log(event.target);
-					slider[0].value = event.target.value;
-					console.log(slider[0]);
+					event.target.setAttribute('value', event.target.value);
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 						// console.log(document.body.innerHTML);
@@ -44,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			});
 
-			document.getElementById('btnSubmit').addEventListener('click', submitForm);
 			document.getElementById('btnSettings').addEventListener('click', function() {
 				chrome.tabs.create({url: 'options.html'});
 			});
@@ -52,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			// list plus button
 			document.getElementById('cloneButton').addEventListener('click', function() {
+				var textFieldValue = document.getElementById('textField').value;
 				// 기존의 버튼 컨테이너를 선택
 				const originalContainer = document.querySelector('.keyword-container');
 
@@ -59,10 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
 				const newContainer = originalContainer.cloneNode(true);
 
 				originalNum = splitKeywordListNum(originalContainer.className);
-				newContainer.className = `keyword-container con${originalNum+1}`;
+				newContainer.className = `keyword-container con${parseInt(originalNum)+1}`;
+				const sliderContainer = newContainer.getElementsByClassName('slider-container');
+				const buttonContainer = newContainer.getElementsByClassName('button-container');
+
+				const tempButton = sliderContainer[0].querySelectorAll('button');
+				tempButton[0].className = "container-minus";
+				tempButton[0].textContent = "-";
+				tempButton[1].className = "oval-button red-oval";
+				tempButton[1].textContent = textFieldValue;
 
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
-				const buttons = newContainer.querySelectorAll('button');
+				const buttons = buttonContainer[0].querySelectorAll('button');
 
 				if (buttons.length > 1) {
 					for (let i = 0; i < buttons.length - 1; i++) {
@@ -133,14 +148,14 @@ function setKeyword(keyword) {
 	}
 }
 
-function submitForm() {
-	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		// `tabs[0]`은 현재 활성화된 탭을 가리킵니다.
-		if (tabs.length > 0) {
-			chrome.tabs.reload(tabs[0].id);
-		}
-	});
-}
+// function submitForm() {
+// 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+// 		// `tabs[0]`은 현재 활성화된 탭을 가리킵니다.
+// 		if (tabs.length > 0) {
+// 			chrome.tabs.reload(tabs[0].id);
+// 		}
+// 	});
+// }
 
 function splitKeywordListNum(str) {
 	const name = str.split(' ')[1];
