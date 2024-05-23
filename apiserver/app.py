@@ -49,11 +49,12 @@ def receive_data():
     print("Received data:", data)
 
 
-    # 클라이언트로부터 받은 title과 topics
+    # 클라이언트로부터 받은 title 처리
     title = data.get('title', '')
     title = unicodedata.normalize('NFC', title)
     title = keep_korean(title)
     topics = data.get('topic', [])
+
     # 비디오 아이디 있으면 확인
     if 'video_id' in data:
         video_id = data.get('video_id', '')
