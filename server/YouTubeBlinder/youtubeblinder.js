@@ -34,6 +34,7 @@ const server = net.createServer((socket) => {
 
     socket.on('data', (data) => {
 
+        console.log('Received data:', dataBuffer); // 수신된 데이터 로그 출력
         const req = JSON.parse(data);
         //const ip = socket.remoteAddress;
         /*  if (req.path === '/topic') {
