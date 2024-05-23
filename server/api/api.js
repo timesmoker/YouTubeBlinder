@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import dotenv from 'dotenv';
 import vision from '@google-cloud/vision';
-import request from 'request';
 
 
 dotenv.config();

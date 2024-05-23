@@ -1,139 +1,114 @@
-import {blindSim, chatgpt, detectTextFromImageUrl} from '../api/api.js';
-import net from 'net';
-import axios from 'axios';
-let connectionId = 0;
+import fs from 'fs';
+import https from 'https';
+import WebSocket, { WebSocketServer } from 'ws';
+import express from 'express';
+import { blindSim, chatgpt, detectTextFromImageUrl } from '../api/api.js';
 
-const apiurl = 'http://13.125.145.225:9836/simCalculate';  // api 서버 주소 -> 유사도
+const app = express();
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
+const privateKey = fs.readFileSync('../Key/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('../Key/fullchain.pem', 'utf8');
+
+const credentials = { key: privateKey, cert: certificate };
+
+// HTTPS 서버 생성 및 WebSocket 서버와 연동
+const httpsServer = https.createServer(credentials, app);
+const wss = new WebSocketServer({ server: httpsServer });
+
+// HTTPS 서버 리스닝 시작
+httpsServer.listen(2018, () => {
+    console.log('HTTPS and WebSocket server is running on port 2018');
+});
+
+let connectionId = 0;
 let topicsAll = new Map();
 
 function addTopic(topic) {
-    if (topicCounts.has(topic)) {
-        topicCounts.set(topic, topicCounts.get(topic) + 1);
+    if (topicsAll.has(topic)) {
+        topicsAll.set(topic, topicsAll.get(topic) + 1);
     } else {
-        topicCounts.set(topic, 1);
+        topicsAll.set(topic, 1);
     }
 }
 
-
-
-function removeTopic(topic) { // 1 줄이고 0이면 삭제
-    if (topicCounts.has(topic)) {
-        let currentCount = topicCounts.get(topic);
+function removeTopic(topic) {
+    if (topicsAll.has(topic)) {
+        let currentCount = topicsAll.get(topic);
         if (currentCount > 1) {
-            topicCounts.set(topic, currentCount - 1);
+            topicsAll.set(topic, currentCount - 1);
         } else {
-            topicCounts.delete(topic);
+            topicsAll.delete(topic);
         }
     }
 }
 
-const server = net.createServer((socket) => {
-    let thisid=connectionId++;
+wss.on('connection', (ws) => {
+    console.log('Client', connectionId, ' connected');
+    let thisid = connectionId++;
     let blockType = true;
     let userTopics = new Map();
 
-    socket.on('data', (data) => {
-
-        console.log('Received data:', dataBuffer); // 수신된 데이터 로그 출력
-        const req = JSON.parse(data);
-        //const ip = socket.remoteAddress;
-        /*  if (req.path === '/topic') {
-              const topic = req.body.topic;
-
-              topics[ip] = topic;
-
-              // Send response
-              socket.write(JSON.stringify({ message: 'Topic received' }));
-          } else */
-        /*
-        if (req.path === '/data') {
-            console.log('Request from client', thisid);
-            const { title,URL } = req.body; //안쓰는 상수 오류 떠서 제목이랑 URL만 남김, 받아서 썸네일 이미지에서 제목 뽑을거임
-            const startTimeChatGpt = Date.now(); // 걸린시간 측정하려고
-
-            console.log('연관어:');
-            console.log(chatgpt(title)); // 연관 주제 확인
-
-
-            const endTimeChatGpt = Date.now();
-            console.log('chatGPT API call 소요시간: ', endTimeChatGpt - startTimeChatGpt, 'ms');
-
-            const startTimeDetectText = Date.now();
-            console.log('썸네일 내 제목:');
-            console.log(detectTextFromImageUrl(URL)); // 썸네일 이미지에서 제목 확인
-            const endTimeDetectText = Date.now();
-            console.log('vision API call 소요시간: ', endTimeDetectText - startTimeDetectText, 'ms');
-
-            let response = {};
-
-            // 30% chance to send the title back
-            if (Math.random() <= 0.3) {
-                response = { title: title };
-                console.log('Title:', title, 'banned');
-            }
-
-            socket.write(JSON.stringify(response));
+    ws.on('message', async (data) => {  // async 키워드 추가
+        let req;
+        try {
+            req = JSON.parse(data);
+        } catch (error) {
+            console.error('JSON 형식 오류', data);
+            ws.send(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
         }
-        */
-        if(req.path === '/topic/add'&&!topics.has(req.topic)){
+
+        console.log('Request from client', thisid);
+
+        if (req.path === '/topic/add' && !userTopics.has(req.topic)) {
             userTopics.set(req.topic, req.threshold);
         }
-        if(req.path === '/topic/all'){
+
+        if (req.path === '/topic/all') {
+            ws.send(JSON.stringify({ topics: Array.from(userTopics.keys()) }));
         }
-        if(req.path === '/topic/remove'&&topics.has(req.topic)){
+
+        if (req.path === '/topic/remove' && userTopics.has(req.topic)) {
             userTopics.delete(req.topic);
         }
-        if( req.path === '/video'){
-              const apiRequest = {
-                  title: title,  //
-                  videoId: req.videoId,
-                  topic: Array.from(userTopics.keys())
-              };
 
-              axios.post(apiurl, apiRequest)
-                      .then(response => {
+        if (req.path === '/video') {
+            const { title, videoId } = req;
 
-                          console.log('Server response:', response.data);
-                          //  데이터 추출
-                          const maxSim = response.data.maxSim;
-                          const totalSim = response.data.totalSim;
+            // 유사도 계산 로직 대체 (예시로 처리)
+            const maxSim = [0.9, 0.8]; // 예시 값
+            const totalSim = [0.9, 0.8]; // 예시 값
+            let threshold = [0.7, 0.7]; // 예시 값
 
-                          // 조건 함수 호출
-                          let banned = false;  // 조건을 만족하는지 추적하는 플래그
+            let banned = false;
 
-                          for (let i = 0; i < maxSim.length; i++) {
-                              if (blindSim(maxSim[i], totalSim[i], threshold[i], blockType)) {
-                                  banned = true;
-                                  break;  // 하나라도 조건을 만족하면 반복 종료
-                              }
-                          }
-                          // 조건만족 -> 차단됨
-                          if (banned) {
-                              console.log('Title:', req.title, 'banned');
-                              socket.write(JSON.stringify(title));
-                          }
-                          else{// 안만족 -> 암것도 안 보냄(실은 빈거 보냄)
-                              console.log('Title:', req.title, 'not banned');
-                              socket.write(JSON.stringify({}));
-                          }
+            for (let i = 0; i < maxSim.length; i++) {
+                if (blindSim(maxSim[i], totalSim[i], threshold[i], blockType)) {
+                    banned = true;
+                    break;
+                }
+            }
 
-                      })
-                      .catch(error => {
-                          console.error('Error:', error);
-                      });
-
+            if (banned) {
+                console.log('Title:', title, 'banned');
+                ws.send(JSON.stringify({ title: title, banned: true }));
+            } else {
+                console.log('Title:', title, 'not banned');
+                ws.send(JSON.stringify({ title: title, banned: false }));
+            }
         }
-        if(req.path === '/blockType'){
+
+        if (req.path === '/blockType') {
             blockType = req.blockType;
         }
-
     });
 
-    socket.on('end', () => {
-        console.log('Client',thisid,' disconnected');
+    ws.on('close', () => {
+        console.log('Client', thisid, ' disconnected');
     });
 });
 
-server.listen(2018, () => {
-    console.log('2018포트 열려있음');
-});
+console.log('WebSocket server is running on port 2018');
