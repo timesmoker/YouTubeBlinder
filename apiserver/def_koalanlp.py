@@ -30,6 +30,7 @@ def analyze_text(text):
 
     return result_list
 
+
 # KoalaNLP 사용 종료
 def close_koalanlp():
     finalize()
