@@ -76,16 +76,11 @@ wss.on('connection', (ws) => {
 
         if (req.path === '/video') {
             const title = req.title;
-            console.log('Title:', typeof title);
-            if (typeof title !== 'string') {
-                console.log('Error: title is not a string');
-                ws.send(JSON.stringify({ error: "Title must be a string" }));
-                return;
-            }
+            console.log('videoId:', req.videoId);
 
             const apiRequest = {
                 title: title,
-                videoId: req.videoId,
+                video_id: req.videoId,
                 topic: Array.from(userTopics.keys())
             };
 
