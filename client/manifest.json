@@ -1,0 +1,39 @@
+{
+	"name": "Youtube Blinder",
+	"description": "Youtube Blinder",
+	"version": "1.0",
+	"manifest_version": 3,
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": true
+	},
+	"permissions": [
+		"scripting",
+		"storage",
+		"unlimitedStorage",
+		"declarativeNetRequest",
+		"declarativeNetRequestFeedback"
+	],
+    "action": {
+        "service_worker": "background.js",
+        "default_popup": "popup/popup.html",
+        "default_title": "Youtube Blinder",
+        "default_icon": "icon.png"
+    },
+	"background": {
+		"script": [ "background.js" ]
+	},
+    "content_scripts": [
+		{
+			"matches": ["*://*.youtube.com/*"],
+			"js":  ["/contentScripts/content.js"],
+			"run_at": "document_start"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["ytblock.html"],
+			"matches": ["<all_urls>"]
+		}
+	]
+}
