@@ -75,10 +75,10 @@ wss.on('connection', (ws) => {
         }
 
         if (req.path === '/video') {
-            const { title, videoId } = req;
+            const  title  = req;
             const apiRequest = {
                 title: title,
-                videoId: videoId,
+                videoId: req.videoId,
                 topic: Array.from(userTopics.keys())
             };
 
