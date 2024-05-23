@@ -4,6 +4,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
 import { blindSim, chatgpt } from '../api/api.js';
 
+
 const app = express();
 
 const privateKey = fs.readFileSync('../Key/privkey.pem', 'utf8');
