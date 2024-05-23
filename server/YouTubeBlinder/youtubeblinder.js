@@ -1,39 +1,37 @@
-
-//import collapse from "bootstrap/js/src/collapse";
 import {blindSim, chatgpt, detectTextFromImageUrl} from '../api/api.js';
 import net from 'net';
 import axios from 'axios';
-//const mysql = require('mysql');
 let connectionId = 0;
 
-const apiurl = 'http://127.0.0.1:5000/apiData';  // Flask 서버의 URL 및 포트 (적절하게 변경 가능)
-/*
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'your_username',
-    password: 'your_password',
-    database: 'your_database'
-});
+const apiurl = 'http://127.0.0.1:5000/apiData';  // Flask 서버의 URL 및 포트 (적절하게 변경 가능);
+let topicsAll = new Map();
 
-db.connect((err) => {
-    if (err) {
-        throw err;
+function addTopic(topic) {
+    if (topicCounts.has(topic)) {
+        topicCounts.set(topic, topicCounts.get(topic) + 1);
+    } else {
+        topicCounts.set(topic, 1);
     }
-    console.log('Connected to database');
-});
+}
 
-global.db = db;
+function removeTopic(topic) { // 1 줄이고 0이면 삭제
+    if (topicCounts.has(topic)) {
+        let currentCount = topicCounts.get(topic);
+        if (currentCount > 1) {
+            topicCounts.set(topic, currentCount - 1);
+        } else {
+            topicCounts.delete(topic);
+        }
+    }
+}
 
-// Store topics by user IP
-const topics = {};
-*/
 const server = net.createServer((socket) => {
     let thisid=connectionId++;
-    let threshold = [0.5,0.4,0.3]; // 이거 이제 설정하는 이벤트 만들어야함
     let blockType = true;
-    let topics = ["음악", "게임", "정치"];
+    let userTopics = new Map();
 
     socket.on('data', (data) => {
+
         const req = JSON.parse(data);
         //const ip = socket.remoteAddress;
         /*  if (req.path === '/topic') {
@@ -74,13 +72,20 @@ const server = net.createServer((socket) => {
             socket.write(JSON.stringify(response));
         }
         */
-
-        if( req.path === '/data'){
-            //임시
-              const title = req.body.title;
+        if(req.path === '/topic/add'&&!topics.has(req.topic)){
+            userTopics.set(req.topic, req.threshold);
+        }
+        if(req.path === '/topic/all'){
+        }
+        if(req.path === '/topic/remove'&&topics.has(req.topic)){
+            userTopics.delete(req.topic);
+        }
+        if( req.path === '/video'){
+              const title = req.title;
               const apiData = {
                   title: title,  // 클라이언트로부터 받은 title 추출
-                  topic: topics
+                  videoId: req.videoId,
+                  topic: Array.from(userTopics.keys())
               };
 
               axios.post(apiurl, apiData)
