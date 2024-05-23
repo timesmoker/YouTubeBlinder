@@ -53,7 +53,7 @@ wss.on('connection', (ws) => {
     let blockType = true;
     let userTopics = new Map();
 
-    // 유저 토픽과 스레숄드 설정
+    // 토픽 예시 설정
     userTopics.set('게임', 0.6);
     userTopics.set('발라드', 0.6);
     userTopics.set('힙합', 0.7);
@@ -75,7 +75,14 @@ wss.on('connection', (ws) => {
         }
 
         if (req.path === '/video') {
-            const  title  = req.title
+            const title = req.title;
+            console.log('Title:', typeof title);
+            if (typeof title !== 'string') {
+                console.log('Error: title is not a string');
+                ws.send(JSON.stringify({ error: "Title must be a string" }));
+                return;
+            }
+
             const apiRequest = {
                 title: title,
                 videoId: req.videoId,
