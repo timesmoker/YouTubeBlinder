@@ -3,7 +3,7 @@ import net from 'net';
 import axios from 'axios';
 let connectionId = 0;
 
-const apiurl = 'http://127.0.0.1:5000/apiData';  // Flask 서버의 URL 및 포트 (적절하게 변경 가능);
+const apiurl = 'http://13.125.145.225:9836/simCalculate';  // api 서버 주소 -> 유사도
 let topicsAll = new Map();
 
 function addTopic(topic) {
@@ -81,14 +81,13 @@ const server = net.createServer((socket) => {
             userTopics.delete(req.topic);
         }
         if( req.path === '/video'){
-              const title = req.title;
-              const apiData = {
-                  title: title,  // 클라이언트로부터 받은 title 추출
+              const apiRequest = {
+                  title: title,  //
                   videoId: req.videoId,
                   topic: Array.from(userTopics.keys())
               };
 
-              axios.post(apiurl, apiData)
+              axios.post(apiurl, apiRequest)
                       .then(response => {
 
                           console.log('Server response:', response.data);
@@ -107,10 +106,11 @@ const server = net.createServer((socket) => {
                           }
                           // 조건만족 -> 차단됨
                           if (banned) {
-                              console.log('Title:', title, 'banned');
+                              console.log('Title:', req.title, 'banned');
                               socket.write(JSON.stringify(title));
                           }
                           else{// 안만족 -> 암것도 안 보냄(실은 빈거 보냄)
+                              console.log('Title:', req.title, 'not banned');
                               socket.write(JSON.stringify({}));
                           }
 
@@ -119,6 +119,9 @@ const server = net.createServer((socket) => {
                           console.error('Error:', error);
                       });
 
+        }
+        if(req.path === '/blockType'){
+            blockType = req.blockType;
         }
 
     });
