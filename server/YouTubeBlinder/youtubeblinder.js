@@ -14,6 +14,8 @@ function addTopic(topic) {
     }
 }
 
+
+
 function removeTopic(topic) { // 1 줄이고 0이면 삭제
     if (topicCounts.has(topic)) {
         let currentCount = topicCounts.get(topic);
