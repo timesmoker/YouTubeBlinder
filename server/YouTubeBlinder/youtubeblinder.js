@@ -2,12 +2,9 @@ import fs from 'fs';
 import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
-import { blindSim, chatgpt, detectTextFromImageUrl } from '../api/api.js';
+import { blindSim, chatgpt } from '../api/api.js';
 
 const app = express();
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
 
 const privateKey = fs.readFileSync('../Key/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('../Key/fullchain.pem', 'utf8');

@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import dotenv from 'dotenv';
 import vision from '@google-cloud/vision';
 
-
+/*
 dotenv.config();
 
 // 환경변수 설정: 서비스 계정 키 파일 위치
@@ -16,7 +16,7 @@ const client = new vision.ImageAnnotatorClient();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
+*/
 export async function chatgpt(word_relation) {
 
   try {
@@ -41,7 +41,7 @@ export async function chatgpt(word_relation) {
     }
   }
 }
-
+/*
 export async function detectTextFromImageUrl(imageUrl) {
   const request = {
     image: {
@@ -64,7 +64,7 @@ export async function detectTextFromImageUrl(imageUrl) {
     console.error('Failed to detect text from image URL:', error);
   }
 }
-
+*/
 export async function keyword_find(keyword) {
     //아직 키워드 데이터를 받기 전이니 항상 새롭게 시작된다고 하고
     //chatgpt로부터 데이터를 받아온 값이 이거라고 침.
@@ -98,7 +98,7 @@ export function blindSim(maxSim, totalSim, threshold, blockType) {
         return totalSim >= threshold;
     }
 }
-
+/*
 export async function check_api(title,url,keyword) {
     let total_sum = 0;
 
@@ -149,5 +149,5 @@ export async function check_api(title,url,keyword) {
         return { title: title };
     }
 }
-
+*/
 
