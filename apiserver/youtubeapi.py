@@ -31,5 +31,4 @@ def get_video_information(api_key, video_id):
     tags = snippet['tags'] if 'tags' in snippet else []
     categoryid = snippet['categoryId'] if 'categoryId' in snippet else ''
     
-    print("변경됨")
     return tags, thumbnail, description, categoryid
