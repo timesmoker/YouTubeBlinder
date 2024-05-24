@@ -18,7 +18,7 @@ def start_server():
             print(f"클라이언트 {client_address}가 연결되었습니다.")
             
             try:
-                data = client_socket.recv(4096).decode("utf-8")  # 버퍼 크기 증가
+                data = client_socket.recv(4096).decode("utf-8")
                 if not data:
                     continue
 
@@ -28,8 +28,13 @@ def start_server():
                     video_id = request_data.get("video_id")
                     video_title = request_data.get("video_title")
                     video_info = request_data.get("video_info")
+                    channel_tag = request_data.get("channel_tag")
 
-                    sql.insert_data(table, video_id, video_title, video_info)
+                    if (table == "today" or table == "learn"):
+                        sql.insert_data(table, video_id, video_title, video_info)
+
+                    elif (table == "channel"):
+                        sql.insert_channel_data(video_id, channel_tag)
 
                 except json.JSONDecodeError:
                     print("유효하지 않은 요청")
@@ -44,7 +49,7 @@ def start_server():
         print("서버가 종료됩니다.")
     finally:
         server_socket.close()
-        sql.close_db()
+        #sql.close_db()
         print("서버 및 데이터베이스 연결이 종료되었습니다.")
 
 if __name__ == "__main__":

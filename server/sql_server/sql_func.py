@@ -1,4 +1,5 @@
 import pymysql
+import json
 
 conn = None
 
@@ -43,6 +44,32 @@ def insert_data(table, video_id, video_title, video_info):
                 print("Data inserted into learn_data table")
             else:
                 print("ID already exists in learn_data table.")
+    except pymysql.MySQLError as e:
+        print(f"Error during database operation: {e}")
+        conn.rollback()
+
+def insert_channel_data(channel_id, channel_tag):
+    if not conn:
+        print("Database connection is not established.")
+        return
+
+    cur = conn.cursor()
+    try:        
+        # ID가 channel 테이블에 존재하는지 확인
+        check_query = "SELECT COUNT(*) FROM channel WHERE channel_id = %s"
+        cur.execute(check_query, (channel_id,))
+        result = cur.fetchone()
+        count = result[0]
+        
+        if count == 0:
+            # ID가 존재하지 않으면 데이터를 삽입
+            insert_query = "INSERT INTO channel (channel_id, channel_tag) VALUES (%s, %s)"
+            cur.execute(insert_query, (channel_id, json.dumps(channel_tag)))
+            conn.commit()
+            print("Data inserted into channel table")
+        else:
+            print("ID already exists in channel table.")
+        
     except pymysql.MySQLError as e:
         print(f"Error during database operation: {e}")
         conn.rollback()
