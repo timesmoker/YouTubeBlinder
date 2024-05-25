@@ -1,10 +1,12 @@
 import socket
 import json
 import sql_func as sql
+import requests
+import time
 
 def start_server():
     host = "0.0.0.0"
-    port = 8856
+    port = 8870
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
@@ -26,15 +28,31 @@ def start_server():
                     request_data = json.loads(data)
                     table = request_data.get("table")
                     video_id = request_data.get("video_id")
-                    video_title = request_data.get("video_title")
-                    video_info = request_data.get("video_info")
-                    channel_tag = request_data.get("channel_tag")
+                    title = request_data.get("title")
+                    description = request_data.get("description")
+                    tags = request_data.get("tags")
+                    column = request_data.get("column")
+                    channel_id = request_data.get("channel_id")
 
                     if (table == "today" or table == "learn"):
-                        sql.insert_data(table, video_id, video_title, video_info)
+                        start_time = time.time()
 
-                    elif (table == "channel"):
-                        sql.insert_channel_data(video_id, channel_tag)
+
+                        sql.insert_data(table, video_id, title, description, tags, channel_id)
+
+                        end_time = time.time()
+                        print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
+                        
+
+                    elif ( table == "today_request" or table == "learn_request"):
+                        start_time = time.time()
+
+                        #sql에서 가져오기
+                        response = sql.send_data(table, column)
+
+                        end_time = time.time()
+                        print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
+                        client_socket.send(response)
 
                 except json.JSONDecodeError:
                     print("유효하지 않은 요청")
@@ -49,7 +67,7 @@ def start_server():
         print("서버가 종료됩니다.")
     finally:
         server_socket.close()
-        #sql.close_db()
+        sql.close_db()
         print("서버 및 데이터베이스 연결이 종료되었습니다.")
 
 if __name__ == "__main__":
