@@ -3,8 +3,32 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (data.htmlContent) {
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
+			document.querySelector('script').src = './popup.js';
 			document.getElementById('btnSettings').style.display = 'none';
 			const buttonsArea = document.getElementById('buttons-area');
+			const topicList = buttonsArea.getElementsByClassName('keyword-container');
+			var thresList = [];
+			var wordList = [];
+			for (var i = 0; i < topicList.length; i++) {
+				thresList[i] = topicList[i].getElementsByClassName('slider')[0].value;
+				wordList[i] = topicList[i].getElementsByClassName('topic-button')[0].textContent;
+			}
+			// topic/all
+			json = JSON.stringify({ path: '/topics/all', topic: wordList, threshold: thresList });
+			chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+				if (chrome.runtime.lastError) {
+					console.error("Error sending message: ", chrome.runtime.lastError);
+				}
+				console.log(`response: ${response}`); // "success"
+			});
+			console.log(`socket send: ${json}`);
+
+			chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+				if (message.type === 'websocket_message') {
+					console.log(`socket receive: ${message.data}`);
+				}
+			});
+
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
 				if (event.target && event.target.nodeName === 'BUTTON') {
@@ -18,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							newButton.className = 'oval-button word-plus';
 							event.target.parentNode.appendChild(newButton);
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-								// console.log(document.body.innerHTML);
+								console.log(document.body.innerHTML);
 							});
 						}
 						else {
@@ -30,12 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
 						var isActive = this.classList.contains('active');
 						console.log('토글 상태:', isActive ? '활성화' : '비활성화');
 						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-							// console.log(document.body.innerHTML);
+							console.log(document.body.innerHTML);
 						});
 					}
 
 					if (event.target.classList.contains('container-minus')) {
+						const topic = event.target.parentNode.getElementsByClassName('topic-button')[0].textContent;
+						// topic/remove
+						json = JSON.stringify({ path: '/topic/remove', topic: topic });
+						chrome.runtime.sendMessage({type: 'send_websocket', message: json });
+						console.log(`socket send: ${json}`);
+
 						event.target.parentNode.parentNode.remove();
+						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+							// console.log(document.body.innerHTML);
+						});
 					}
 				}
 			});
@@ -44,23 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
 					event.target.setAttribute('value', event.target.value);
+					const buttonList = event.target.parentNode.parentNode.getElementsByClassName('red-oval');
+
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length < event.target.value / event.target.max) {
+							buttonList[i].classList.remove('active');
+							console.log(buttonList[i]);
+							console.log('deactive');
+						}
+					}
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length > event.target.value / event.target.max) {
+							buttonList[i].classList.add('active');
+							console.log(buttonList[i]);
+							console.log('active');
+						}
+					}
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-						// console.log(document.body.innerHTML);
+						console.log(document.body.innerHTML);
 					});
 				}
 			});
 
-			document.getElementById('btnSettings').addEventListener('click', function() {
-				chrome.tabs.create({url: 'options.html'});
+			document.getElementById('textField').addEventListener('keypress', function(e) {
+				if (e.key === 'Enter') {
+					submitFunc();
+				}
 			});
-
-
 			// list plus button
-			document.getElementById('cloneButton').addEventListener('click', function() {
+			document.getElementById('cloneButton').addEventListener('click', submitFunc);
+			function submitFunc() {
 				var textFieldValue = document.getElementById('textField').value;
 				// 기존의 버튼 컨테이너를 선택
-				const originalContainer = document.querySelector('.keyword-container');
+				const originalContainers = document.querySelectorAll('.keyword-container');
+				const originalContainer = originalContainers[originalContainers.length - 1];
 
 				// 컨테이너를 깊은 복사하여 모든 요소를 포함하여 복제
 				const newContainer = originalContainer.cloneNode(true);
@@ -73,8 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				const tempButton = sliderContainer[0].querySelectorAll('button');
 				tempButton[0].className = "container-minus";
 				tempButton[0].textContent = "-";
-				tempButton[1].className = "oval-button red-oval";
+				tempButton[1].className = "oval-button red-oval topic-button";
 				tempButton[1].textContent = textFieldValue;
+
+				sliderContainer[0].getElementsByClassName('slider')[0].setAttribute('value', 100);
+				sliderContainer[0].getElementsByClassName('sliderValue')[0].textContent = 100;
 
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
 				const buttons = buttonContainer[0].querySelectorAll('button');
@@ -85,19 +139,16 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 
+				// 문서에 새로운 컨테이너 추가
+				originalContainer.insertAdjacentElement('afterend', newContainer);
+
 				chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 					console.log(document.body.innerHTML);
 				});
-
-				// 문서에 새로운 컨테이너 추가
-				originalContainer.insertAdjacentElement('afterend', newContainer);
-			});
+			}
 		}
 	});
 	//////////////
-	// chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-	// 	console.log(document.body.innerHTML);
-	// });
 	// chrome.storage.local.get('keywordList', function(result) {
 	// 	var removeList = buttonsArea.getElementsByClassName('keyword-container');
 	// 	for (var i = 0; i < removeList.length; i++) {

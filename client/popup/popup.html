@@ -63,15 +63,15 @@
             text-align: center;
             cursor: pointer;
             outline: none;
-            color: white;
-            background-color: black;
+            color: #F1F1f1;
+            background-color: #212121;
             border: none;
             border-radius: 5px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
         }
         .toggle-button.active {
-            background-color: white; /* 활성화 상태 색상 변경 */
-            color: black;
+            background-color: #F1F1f1; /* 활성화 상태 색상 변경 */
+            color: #212121;
         }
     </style>
 </head>
@@ -79,8 +79,8 @@
     <div>
         <h2>YouTubeBlinder</h2>
         <button id="btnSettings">설정</button>
+        <hr>
         <br>
-        <h4>추천 키워드</h4>
     </div>
     <div class="form">
         <input type="text" id="textField" name="name" placeholder="키워드를 입력하세요">
@@ -91,7 +91,7 @@
             <hr>
             <div class="slider-container">
                 <button class="container-minus">-</button>
-                <button class="oval-button red-oval">새 버튼</button>
+                <button class="oval-button red-oval topic-button">정치</button>
                 <input type="range" class="slider" min="1" max="100" value="50">
                 <span class="sliderValue">50</span>
             </div>
@@ -103,13 +103,14 @@
             <hr>
             <div class="slider-container">
                 <button class="container-minus">-</button>
-                <button class="oval-button red-oval">새 버튼</button>
+                <button class="oval-button red-oval topic-button">음악</button>
                 <input type="range" class="slider" min="1" max="100" value="50">
                 <span class="sliderValue">50</span>
             </div>
             <div class="button-container">
                 <button class="oval-button word-plus">+</button>
             </div>
+        </div>
     </div>
     <script src="./popup.js"></script>
 </body>

@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 	chrome.storage.local.get("htmlContent", function(data) {
 		if (data.htmlContent) {
+			console.log(data.htmlContent);
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
+			document.querySelector('script').src = './popup.js';
+			chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+				console.log(document.body.innerHTML);
+			});
 			document.getElementById('btnSettings').style.display = 'block';
 			const buttonsArea = document.getElementById('buttons-area');
 			// word plus button
@@ -18,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							newButton.className = 'oval-button word-plus';
 							event.target.parentNode.appendChild(newButton);
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-								// console.log(document.body.innerHTML);
+								console.log(document.body.innerHTML);
 							});
 						}
 						else {
@@ -30,12 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
 						var isActive = this.classList.contains('active');
 						console.log('토글 상태:', isActive ? '활성화' : '비활성화');
 						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-							// console.log(document.body.innerHTML);
+							console.log(document.body.innerHTML);
 						});
 					}
 
 					if (event.target.classList.contains('container-minus')) {
+						const topic = event.target.parentNode.getElementsByClassName('topic-button')[0].textContent;
+						// topic/remove
+						// socket.onopen = function(event) {
+						// 	json = JSON.stringify({ path: '/topic/all', topic: topic });
+						// 	socket.send(json);
+						// }
 						event.target.parentNode.parentNode.remove();
+						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+							console.log(document.body.innerHTML);
+						});
 					}
 				}
 			});
@@ -44,9 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
 					// 슬라이더 값을 해당 슬라이더 바로 옆의 span 요소에 표시
 					event.target.nextElementSibling.textContent = event.target.value;
 					event.target.setAttribute('value', event.target.value);
+					const buttonList = event.target.parentNode.parentNode.getElementsByClassName('red-oval');
+
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length < event.target.value / event.target.max) {
+							buttonList[i].classList.remove('active');
+							console.log(buttonList[i]);
+							console.log('deactive');
+						}
+					}
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length > event.target.value / event.target.max) {
+							buttonList[i].classList.add('active');
+							console.log(buttonList[i]);
+							console.log('active');
+						}
+					}
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-						// console.log(document.body.innerHTML);
+						console.log(document.body.innerHTML);
 					});
 				}
 			});
@@ -55,12 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
 				chrome.tabs.create({url: 'options.html'});
 			});
 
-
 			// list plus button
-			document.getElementById('cloneButton').addEventListener('click', function() {
+			document.getElementById('cloneButton').addEventListener('click', submitFunc);
+			document.getElementById('textField').addEventListener('keypress', function(e) {
+				if (e.key === 'Enter') {
+					submitFunc();
+				}
+			});
+			function submitFunc() {
 				var textFieldValue = document.getElementById('textField').value;
 				// 기존의 버튼 컨테이너를 선택
-				const originalContainer = document.querySelector('.keyword-container');
+				const originalContainers = document.querySelectorAll('.keyword-container');
+				const originalContainer = originalContainers[originalContainers.length - 1];
 
 				// 컨테이너를 깊은 복사하여 모든 요소를 포함하여 복제
 				const newContainer = originalContainer.cloneNode(true);
@@ -73,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const tempButton = sliderContainer[0].querySelectorAll('button');
 				tempButton[0].className = "container-minus";
 				tempButton[0].textContent = "-";
-				tempButton[1].className = "oval-button red-oval";
+				tempButton[1].className = "oval-button red-oval topic-button";
 				tempButton[1].textContent = textFieldValue;
 
 				// 복제된 컨테이너에서 모든 버튼 요소 찾기
@@ -85,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 
+				// 문서에 새로운 컨테이너 추가
+				originalContainer.insertAdjacentElement('afterend', newContainer);
+
 				chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 					console.log(document.body.innerHTML);
 				});
-
-				// 문서에 새로운 컨테이너 추가
-				originalContainer.insertAdjacentElement('afterend', newContainer);
-			});
+			}
 		}
 	});
 	//////////////

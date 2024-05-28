@@ -39,29 +39,29 @@
 	// }
 // });
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
 	console.log(document.innerHTML);
 	const videoPlayer = document.getElementById('contents');
 	console.log(videoPlayer);
-	if (videoPlayer) {
-		// 비디오 플레이어 숨기기
-		videoPlayer.style.display = 'none';
+	// if (videoPlayer) {
+	// 	// 비디오 플레이어 숨기기
+	// 	videoPlayer.style.display = 'none';
 
-		// 사용자 정의 이미지 및 메시지 삽입
-		const blocker = document.createElement('div');
-		blocker.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-		<img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" alt="Blocked Video" style="max-width: 100%; height: auto;">
-		<p>This video is blocked. Click the button below to watch the video.</p>
-		<button id="unblockButton">Watch Video</button>
-		</div>`;
-		videoPlayer.parentNode.insertBefore(blocker, videoPlayer);
+	// 	// 사용자 정의 이미지 및 메시지 삽입
+	// 	const blocker = document.createElement('div');
+	// 	blocker.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+	// 	<img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" alt="Blocked Video" style="max-width: 100%; height: auto;">
+	// 	<p>This video is blocked. Click the button below to watch the video.</p>
+	// 	<button id="unblockButton">Watch Video</button>
+	// 	</div>`;
+	// 	videoPlayer.parentNode.insertBefore(blocker, videoPlayer);
 
-		// 버튼 클릭 이벤트 핸들러
-		document.getElementById('unblockButton').addEventListener('click', function() {
-		videoPlayer.style.display = '';
-		blocker.style.display = 'none';
-		});
-	}
+	// 	// 버튼 클릭 이벤트 핸들러
+	// 	document.getElementById('unblockButton').addEventListener('click', function() {
+	// 	videoPlayer.style.display = '';
+	// 	blocker.style.display = 'none';
+	// 	});
+	// }
 	console.log('------------------------');
 
 	const ip = "3.37.177.6.sslip.io";
@@ -112,57 +112,48 @@ document.addEventListener('DOMContentLoaded', () => {
 	// temp.getElementsByTagName('a')[0].href = videos[1].getElementsByTagName('ytd-thumbnail')[0].getElementsByTagName('a')[0].href;
 	// console.log(temp.getElementsByTagName('a')[0].href);
 
-	console.log(videos.length);
-	var vidArr = [];
-	for (var i = 0; i < videos.length; i++) {
-		// 3 array list for each videos
-		// 1st and 2nd have title and link
-		// 3rd has any 'h3' tag, so return an error
-		vidArr[i] = new Video(videos[i]);
-		// console.log(vidArr[i]);
-		try {
-			var thumbnail = vidArr[i].thumbnail;
-			var channel = vidArr[i].channel;
-			// console.log(thumbnail);
-			// console.log(channel);
-			// console.log(i, "-------------------");
-			if (title == '') {
-				// invisible
-				// video.style.display='none';
-				// blur
-				vidArr[i].style.filter = "blur(5Px)";
-			}
-			// general video link
-			link = getVideoLink(vidArr[i]);
-			id = link.split('=')[1];
-			// thumbnail link
-			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
-			// console.log(thumbnail);
-			json = JSON.stringify({ title: title, URL: thumbnail });
-			// console.log(json);
-			socket.send(json);
-		} catch (error) {
-			// console.log(i, "===================");
-			// console.log(error);
-			// console.log(i, "===================");
-			// console.log(video);
-			// console.log(i, "===================");
-		}
-	}
 
 	socket.onopen = function(event) {
 		console.log('Connection opened');
+
+		console.log(videos.length);
+		var vidArr = [];
 		for (var i = 0; i < videos.length; i++) {
-			title = vidArr[i].title;
-			link = vidArr[i].thumblink;
-			id = link.split('=')[1];
-			// thumbnail link
-			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
-			// console.log(thumbnail);
-			json = JSON.stringify({ title: title, URL: thumbnail });
-			// console.log(json);
-			socket.send(json);
-			// console.log('--------------');
+			// 3 array list for each videos
+			// 1st and 2nd have title and link
+			// 3rd has any 'h3' tag, so return an error
+			vidArr[i] = new Video(videos[i]);
+			// console.log(vidArr[i]);
+			try {
+				var thumbnail = vidArr[i].thumbnail;
+				var channel = vidArr[i].channel;
+				// console.log(thumbnail);
+				// console.log(channel);
+				// console.log(i, "-------------------");
+				if (title == '') {
+					// invisible
+					// video.style.display='none';
+					// blur
+					vidArr[i].style.filter = "blur(5Px)";
+				}
+				// general video link
+				console.log(vidArr[i]);
+				link = getVideoLink(videos[i]);
+				id = link.split('=')[1];
+				// thumbnail link
+				thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
+				// console.log(thumbnail);
+				json = JSON.stringify({ path: '/video', title: vidArr[i].title, URL: id });
+				// console.log(json);
+				socket.send(json);
+				console.log(json);
+			} catch (error) {
+				console.log(i, "===================");
+				console.log(error);
+				console.log(i, "===================");
+				console.log(video);
+				console.log(i, "===================");
+			}
 		}
 	};
 
@@ -170,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		var title = JSON.parse(event.data)["title"];
 		if (title) {
 			console.log(title);
+		}
+		for (var i = 0; i < videos.length; i++) {
+			if (getVideoTitle(videos[i])== title) {
+				videos[i].style.display='none';
+			}
 		}
 	}
 
