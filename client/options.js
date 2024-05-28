@@ -14,21 +14,43 @@ document.addEventListener('DOMContentLoaded', () => {
 				wordList[i] = topicList[i].getElementsByClassName('topic-button')[0].textContent;
 			}
 			// topic/all
-			json = JSON.stringify({ path: '/topics/all', topic: wordList, threshold: thresList });
+			json = JSON.stringify({ path: '/topic/all', topics: wordList, threshold: thresList });
 			chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
 				if (chrome.runtime.lastError) {
 					console.error("Error sending message: ", chrome.runtime.lastError);
 				}
-				console.log(`response: ${response}`); // "success"
+				console.log(`topicAll send response: ${response}`); // "success"
 			});
-			console.log(`socket send: ${json}`);
+
+			// topic/adjacency
+			for (var i = 0; i < topicList.length; i++) {
+				json = JSON.stringify({ path: '/topic/adjacency', topic: wordList[i]})
+				chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+					if (chrome.runtime.lastError) {
+						console.error("Error sending message: ", chrome.runtime.lastError);
+					}
+					console.log(`topicAll send response: ${response}`); // "success"
+				})
+			}
 
 			chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 				if (message.type === 'websocket_message') {
-					console.log(`socket receive: ${message.data}`);
+					console.log(`receive socket receive: ${message.value}`);
+					resultJson = JSON.parse(message.value);
+					// word plus response
+					try {
+						const resultWordList = resultJson.word;
+						const resultThresList = resultJson.threshold;
+						for (var i = 0; i < topicList.length; i++){
+							console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+						}
+					} catch (e) {
+						console.log(e);
+					}
+					//
 				}
+				sendResponse({value: message.value});
 			});
-
 			// word plus button
 			buttonsArea.addEventListener('click', function(event) {
 				if (event.target && event.target.nodeName === 'BUTTON') {
@@ -58,12 +80,18 @@ document.addEventListener('DOMContentLoaded', () => {
 						});
 					}
 
+					// topic/remove
 					if (event.target.classList.contains('container-minus')) {
 						const topic = event.target.parentNode.getElementsByClassName('topic-button')[0].textContent;
+						console.log(`topic type: ${typeof(topic)}`);
 						// topic/remove
 						json = JSON.stringify({ path: '/topic/remove', topic: topic });
-						chrome.runtime.sendMessage({type: 'send_websocket', message: json });
-						console.log(`socket send: ${json}`);
+						chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+							if (chrome.runtime.lastError) {
+								console.error("Error sending message: ", chrome.runtime.lastError);
+							}
+							console.log(`topicAdd send response: ${response}`); // "success"
+						});
 
 						event.target.parentNode.parentNode.remove();
 						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
@@ -141,6 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				// 문서에 새로운 컨테이너 추가
 				originalContainer.insertAdjacentElement('afterend', newContainer);
+
+				// topic/add
+				json = JSON.stringify({ path: '/topic/add', topic: textFieldValue, threshold: 100 });
+				chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+					if (chrome.runtime.lastError) {
+						console.error("Error sending message: ", chrome.runtime.lastError);
+					}
+					console.log(`topicAdd send response: ${response}`); // "success"
+				});
 
 				chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 					console.log(document.body.innerHTML);
