@@ -47,55 +47,6 @@ function removeTopic(topic) {
     }
 }
 
-import fs from 'fs';
-import https from 'https';
-import WebSocket, { WebSocketServer } from 'ws';
-import express from 'express';
-import { blindSim } from '../api/api.js';
-import axios from 'axios';
-
-const app = express();
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
-const privateKey = fs.readFileSync('../Key/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('../Key/fullchain.pem', 'utf8');
-
-const credentials = { key: privateKey, cert: certificate };
-
-// HTTPS 서버 생성 및 WebSocket 서버와 연동
-const httpsServer = https.createServer(credentials, app);
-const wss = new WebSocketServer({ server: httpsServer });
-
-// HTTPS 서버 리스닝 시작
-httpsServer.listen(2018, () => {
-    console.log('HTTPS and WebSocket server is running on port 2018');
-});
-
-let connectionId = 0;
-const apiurl = 'http://13.125.145.225:9836/simCalculate';  // API 서버 주소
-let topicsAll = new Map();
-
-function addTopic(topic) {
-    if (topicsAll.has(topic)) {
-        topicsAll.set(topic, topicsAll.get(topic) + 1);
-    } else {
-        topicsAll.set(topic, 1);
-    }
-}
-
-function removeTopic(topic) {
-    if (topicsAll.has(topic)) {
-        let currentCount = topicsAll.get(topic);
-        if (currentCount > 1) {
-            topicsAll.set(topic, currentCount - 1);
-        } else {
-            topicsAll.delete(topic);
-        }
-    }
-}
-
 wss.on('connection', (ws) => {
     console.log('Client', connectionId, ' connected');
     let thisid = connectionId++;
@@ -129,7 +80,7 @@ wss.on('connection', (ws) => {
             if (req.path === '/topic/add' && !userTopics.has(req.topic)) {
                 userTopics.set(req.topic, req.threshold);
             } else if (req.path === '/topic/all') {
-                ws.send(JSON.stringify({topics: Array.from(userTopics.keys())}));
+                ws.send(JSON.stringify({ topics: Array.from(userTopics.keys()) }));
             } else if (req.path === '/topic/remove' && userTopics.has(req.topic)) {
                 userTopics.delete(req.topic);
             } else if (req.path === '/video') {
@@ -159,10 +110,10 @@ wss.on('connection', (ws) => {
 
                 if (banned) {
                     console.log('Title:', title, 'banned');
-                    ws.send(JSON.stringify({title: title, banned: true}));
+                    ws.send(JSON.stringify({ title: title, banned: true }));
                 } else {
                     console.log('Title:', title, 'not banned');
-                    ws.send(JSON.stringify({title: title, banned: false}));
+                    ws.send(JSON.stringify({ title: title, banned: false }));
                 }
             } else if (req.path === '/blockType') {
                 blockType = req.blockType;
@@ -184,7 +135,6 @@ wss.on('connection', (ws) => {
     });
 
 
+
     console.log('WebSocket server is running on port 2018');
-
-
 });
