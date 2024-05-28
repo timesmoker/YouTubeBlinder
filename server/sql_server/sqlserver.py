@@ -1,8 +1,8 @@
 import socket
 import json
-import sql_func as sql
-import requests
+import sql_func as sql  # 'sql_func' 모듈을 사용하여 SQL 함수 호출
 import time
+import gzip
 
 def start_server():
     host = "0.0.0.0"
@@ -37,23 +37,29 @@ def start_server():
                     if (table == "today" or table == "learn"):
                         start_time = time.time()
 
-
                         sql.insert_data(table, video_id, title, description, tags, channel_id)
 
                         end_time = time.time()
                         print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
                         
-
-                    elif ( table == "today_request" or table == "learn_request"):
+                    elif (table == "today_request" or table == "learn_request"):
                         start_time = time.time()
 
-                        #sql에서 가져오기
+                        # sql에서 데이터 가져오기
                         response = sql.send_data(table, column)
 
                         end_time = time.time()
                         print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
-                        client_socket.send(response)
 
+                        # 데이터 길이 보내기
+                        data_length = len(response)
+                        client_socket.sendall(data_length.to_bytes(8, 'big'))
+
+                        # 데이터를 10MB 청크로 나누어 전송
+                        chunk_size = 10 * 1024 * 1024
+                        for i in range(0, data_length, chunk_size):
+                            client_socket.sendall(response[i:i + chunk_size])
+                    
                 except json.JSONDecodeError:
                     print("유효하지 않은 요청")
 
