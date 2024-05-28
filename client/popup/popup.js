@@ -5,10 +5,18 @@
 document.addEventListener('DOMContentLoaded', () => {
 	chrome.storage.local.get("htmlContent", function(data) {
 		if (data.htmlContent) {
+			console.log(data.htmlContent);
 			document.body.innerHTML = data.htmlContent;
 			console.log("HTML is loaded and applied");
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+			document.querySelector('script').src = './popup.js';
+			chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+				console.log(document.body.innerHTML);
+			});
+>>>>>>> 80ad9ef (client latest)
 			document.getElementById('btnSettings').style.display = 'block';
 =======
 >>>>>>> dee3602 (popup and options sync)
@@ -39,7 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 								// console.log(document.body.innerHTML);
+=======
+								console.log(document.body.innerHTML);
+>>>>>>> 80ad9ef (client latest)
 							});
 						}
 						else {
@@ -51,12 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
 						var isActive = this.classList.contains('active');
 						console.log('토글 상태:', isActive ? '활성화' : '비활성화');
 						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-							// console.log(document.body.innerHTML);
+							console.log(document.body.innerHTML);
 						});
 					}
 
 					if (event.target.classList.contains('container-minus')) {
+						const topic = event.target.parentNode.getElementsByClassName('topic-button')[0].textContent;
+						// topic/remove
+						// socket.onopen = function(event) {
+						// 	json = JSON.stringify({ path: '/topic/all', topic: topic });
+						// 	socket.send(json);
+						// }
 						event.target.parentNode.parentNode.remove();
+<<<<<<< HEAD
 =======
 								console.log(document.body.innerHTML);
 =======
@@ -80,6 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 					if (event.target.classList.contains('container-minus')) {
 						event.target.parentNode.parentNode.remove();
+=======
+						chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
+							console.log(document.body.innerHTML);
+						});
+>>>>>>> 80ad9ef (client latest)
 					}
 				}
 			});
@@ -91,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <<<<<<< HEAD
 <<<<<<< HEAD
 					event.target.setAttribute('value', event.target.value);
+<<<<<<< HEAD
 =======
 					console.log(event.target.value);
 					const slider = this.getElementsByClassName('slider');
@@ -102,9 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
 =======
 					event.target.setAttribute('value', event.target.value);
 >>>>>>> d244c07 (draft UI)
+=======
+					const buttonList = event.target.parentNode.parentNode.getElementsByClassName('red-oval');
+
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length < event.target.value / event.target.max) {
+							buttonList[i].classList.remove('active');
+							console.log(buttonList[i]);
+							console.log('deactive');
+						}
+					}
+					for (var i = 0; i <buttonList.length; i++) {
+						if (i / buttonList.length > event.target.value / event.target.max) {
+							buttonList[i].classList.add('active');
+							console.log(buttonList[i]);
+							console.log('active');
+						}
+					}
+>>>>>>> 80ad9ef (client latest)
 
 					chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-						// console.log(document.body.innerHTML);
+						console.log(document.body.innerHTML);
 					});
 <<<<<<< HEAD
 				}
@@ -125,11 +168,20 @@ document.addEventListener('DOMContentLoaded', () => {
 				chrome.tabs.create({url: 'options.html'});
 			});
 
-
 			// list plus button
+<<<<<<< HEAD
 			document.getElementById('cloneButton').addEventListener('click', function() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+=======
+			document.getElementById('cloneButton').addEventListener('click', submitFunc);
+			document.getElementById('textField').addEventListener('keypress', function(e) {
+				if (e.key === 'Enter') {
+					submitFunc();
+				}
+			});
+			function submitFunc() {
+>>>>>>> 80ad9ef (client latest)
 				var textFieldValue = document.getElementById('textField').value;
 =======
 >>>>>>> dee3602 (popup and options sync)
@@ -137,7 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				var textFieldValue = document.getElementById('textField').value;
 >>>>>>> d244c07 (draft UI)
 				// 기존의 버튼 컨테이너를 선택
-				const originalContainer = document.querySelector('.keyword-container');
+				const originalContainers = document.querySelectorAll('.keyword-container');
+				const originalContainer = originalContainers[originalContainers.length - 1];
 
 				// 컨테이너를 깊은 복사하여 모든 요소를 포함하여 복제
 				const newContainer = originalContainer.cloneNode(true);
@@ -154,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const tempButton = sliderContainer[0].querySelectorAll('button');
 				tempButton[0].className = "container-minus";
 				tempButton[0].textContent = "-";
-				tempButton[1].className = "oval-button red-oval";
+				tempButton[1].className = "oval-button red-oval topic-button";
 				tempButton[1].textContent = textFieldValue;
 <<<<<<< HEAD
 
@@ -178,13 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 
+				// 문서에 새로운 컨테이너 추가
+				originalContainer.insertAdjacentElement('afterend', newContainer);
+
 				chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 					console.log(document.body.innerHTML);
 				});
-
-				// 문서에 새로운 컨테이너 추가
-				originalContainer.insertAdjacentElement('afterend', newContainer);
-			});
+			}
 		}
 	});
 	//////////////

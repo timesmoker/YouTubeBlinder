@@ -31,7 +31,6 @@
 	],
 >>>>>>> dee3602 (popup and options sync)
     "action": {
-        "service_worker": "background.js",
         "default_popup": "popup/popup.html",
         "default_title": "Youtube Blinder",
         "default_icon": "icon.png"
@@ -39,7 +38,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 	"background": {
-		"script": [ "background.js" ]
+		"service_worker": "background.js"
 	},
     "content_scripts": [
 		{
@@ -48,6 +47,7 @@
 			"js":  ["/contentScripts/content.js"],
 			"run_at": "document_start"
 		}
+<<<<<<< HEAD
 	],
 	"web_accessible_resources": [
 		{
@@ -78,5 +78,7 @@
 			"matches": ["<all_urls>"]
 		}
 >>>>>>> 3fcc778 (popup)
+=======
+>>>>>>> 80ad9ef (client latest)
 	]
 }
