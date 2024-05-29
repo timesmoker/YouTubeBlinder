@@ -43,6 +43,7 @@ function removeTopic(topicsAll, topic) {
     } else {
         topicsAll.delete(topic);
     }
+
 }
 
 wss.on('connection', (ws) => {
