@@ -76,12 +76,15 @@ window.addEventListener('load', () => {
 	// 	blocker.style.display = 'none';
 	// 	});
 	// }
+<<<<<<< HEAD
 >>>>>>> 80ad9ef (client latest)
 	console.log('------------------------');
 
 	const ip = "3.37.177.6.sslip.io";
 	const port = "2018";
 	const socket = new WebSocket(`wss://${ip}:${port}`);
+=======
+>>>>>>> f1bfa3e (todo classification server response)
 	// get a list of Youtube videos
 	var videos = this.document.getElementsByTagName('ytd-rich-grid-media');
 	// console.log(videos.length);
@@ -128,65 +131,83 @@ window.addEventListener('load', () => {
 	// console.log(temp.getElementsByTagName('a')[0].href);
 
 
-	socket.onopen = function(event) {
-		console.log('Connection opened');
+	console.log('Connection opened');
 
-		console.log(videos.length);
-		var vidArr = [];
-		for (var i = 0; i < videos.length; i++) {
-			// 3 array list for each videos
-			// 1st and 2nd have title and link
-			// 3rd has any 'h3' tag, so return an error
-			vidArr[i] = new Video(videos[i]);
-			// console.log(vidArr[i]);
-			try {
-				var thumbnail = vidArr[i].thumbnail;
-				var channel = vidArr[i].channel;
-				// console.log(thumbnail);
-				// console.log(channel);
-				// console.log(i, "-------------------");
-				if (title == '') {
-					// invisible
-					// video.style.display='none';
-					// blur
-					vidArr[i].style.filter = "blur(5Px)";
+	console.log(videos.length);
+	var vidArr = [];
+	for (var i = 0; i < videos.length; i++) {
+		// 3 array list for each videos
+		// 1st and 2nd have title and link
+		// 3rd has any 'h3' tag, so return an error
+		vidArr[i] = new Video(videos[i]);
+		// console.log(vidArr[i]);
+		try {
+			var thumbnail = vidArr[i].thumbnail;
+			var channel = vidArr[i].channel;
+			// console.log(thumbnail);
+			// console.log(channel);
+			// console.log(i, "-------------------");
+			if (title == '') {
+				// invisible
+				// video.style.display='none';
+				// blur
+				vidArr[i].style.filter = "blur(5Px)";
+			}
+			// general video link
+			console.log(vidArr[i]);
+			link = getVideoLink(videos[i]);
+			id = link.split('=')[1];
+			// thumbnail link
+			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
+			// console.log(thumbnail);
+			// video
+			json = JSON.stringify({ path: '/video', title: vidArr[i].title, URL: id });
+			// console.log(json);
+			chrome.runtime.sendMessage({type: "send_websocket", key: "path", value: json}, function(response) {
+				if (chrome.runtime.lastError) {
+					console.error("Error sending message: ", chrome.runtime.lastError);
 				}
-				// general video link
-				console.log(vidArr[i]);
-				link = getVideoLink(videos[i]);
-				id = link.split('=')[1];
-				// thumbnail link
-				thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
-				// console.log(thumbnail);
-				json = JSON.stringify({ path: '/video', title: vidArr[i].title, URL: id });
-				// console.log(json);
-				socket.send(json);
-				console.log(json);
-			} catch (error) {
-				console.log(i, "===================");
-				console.log(error);
-				console.log(i, "===================");
-				console.log(video);
-				console.log(i, "===================");
-			}
-		}
-	};
-
-	socket.onmessage = function(event) {
-		var title = JSON.parse(event.data)["title"];
-		if (title) {
-			console.log(title);
-		}
-		for (var i = 0; i < videos.length; i++) {
-			if (getVideoTitle(videos[i])== title) {
-				videos[i].style.display='none';
-			}
+				console.log(`video send response: ${response}`); // "success"
+			});
+			console.log(json);
+		} catch (error) {
+			console.log(i, "===================");
+			console.log(error);
+			console.log(i, "===================");
+			console.log(video);
+			console.log(i, "===================");
 		}
 	}
 
-	socket.onclose = function(event) {
-		console.log('close: ', event);
-	}
+	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+		if (message.type === 'websocket_message') {
+			console.log(`receive socket receive: ${message.value}`);
+			resultJson = JSON.parse(message.value);
+			// word plus response
+			try {
+				const resultWordList = resultJson.word;
+				const resultThresList = resultJson.threshold;
+				for (var i = 0; i < topicList.length; i++){
+					console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+				}
+			} catch (e) {
+				console.log(e);
+			}
+			console.log(resultJson);
+		}
+		sendResponse({value: message.value});
+	});
+	//blind videos
+	// var title = JSON.parse(event.data)["title"];
+	// if (title) {
+	// 	console.log(title);
+	// }
+	// for (var i = 0; i < videos.length; i++) {
+	// 	if (getVideoTitle(videos[i])== title) {
+	// 		videos[i].style.display='none';
+	// 	}
+	// }
+
 
 	// socket.onmessage = function(event) {
 	// 	var title = JSON.parse(event.data)["title"];
