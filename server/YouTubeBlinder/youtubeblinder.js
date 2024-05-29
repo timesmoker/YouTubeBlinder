@@ -82,15 +82,6 @@ wss.on('connection', (ws) => {
                     axios.post(apiURL, notBannedRequest);
                     break;
 
-                case '/topic/all':
-                    for (let topic of userTopics.keys()) {
-                        removeTopic(topicsAll, topic);
-                    }
-                    for (let i = 0; i < req.topics.length; i++) {
-                        userTopics.set(req.topics[i], (req.threshold[i] / 100));
-                    }
-                    break;
-
                 case '/topic/adjacency':
                     const adjacencyRequest = {
                         topic: req.topic
@@ -117,14 +108,26 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
+                case '/topic/all':
+                    for (let topic of userTopics.keys()) {
+                        removeTopic(topicsAll, topic);
+                    }
+                    for (let i = 0; i < req.topics.length; i++) {
+                        userTopics.set(req.topics[i], (req.threshold[i] / 100));
+                        addTopic(topicsAll, req.topics[i]);
+                    }
+                    break;
+
                 case '/topic/add':
                     if (!userTopics.has(req.topic)) {
+                        userTopics.set(req.topic, (req.threshold / 100));
                         addTopic(topicsAll, req.topic);
                     }
                     break;
 
                 case '/topic/remove':
                     if (userTopics.has(req.topic)) {
+                        userTopics.delete(req.topic);
                         removeTopic(topicsAll, req.topic);
                     }
                     break;
