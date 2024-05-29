@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			// topic/all
 			json = JSON.stringify({ path: '/topic/all', topics: wordList, threshold: thresList });
-			chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+			chrome.runtime.sendMessage({type: "send_websocket", key: "topic/all", value: json}, function(response) {
 				if (chrome.runtime.lastError) {
 					console.error("Error sending message: ", chrome.runtime.lastError);
 				}
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			// topic/adjacency
 			for (var i = 0; i < topicList.length; i++) {
 				json = JSON.stringify({ path: '/topic/adjacency', topic: wordList[i]})
-				chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+				chrome.runtime.sendMessage({type: "send_websocket", key: "topic/adjacency", value: json}, function(response) {
 					if (chrome.runtime.lastError) {
 						console.error("Error sending message: ", chrome.runtime.lastError);
 					}
@@ -38,14 +38,16 @@ document.addEventListener('DOMContentLoaded', () => {
 					console.log(`receive socket receive: ${message.value}`);
 					resultJson = JSON.parse(message.value);
 					// word plus response
-					try {
-						const resultWordList = resultJson.word;
-						const resultThresList = resultJson.threshold;
-						for (var i = 0; i < topicList.length; i++){
-							console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+					if (message.key.split('/')[0] == "topic") {
+						try {
+							const resultWordList = resultJson.word;
+							const resultThresList = resultJson.threshold;
+							for (var i = 0; i < topicList.length; i++){
+								console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+							}
+						} catch (e) {
+							console.log(e);
 						}
-					} catch (e) {
-						console.log(e);
 					}
 					//
 				}
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						console.log(`topic type: ${typeof(topic)}`);
 						// topic/remove
 						json = JSON.stringify({ path: '/topic/remove', topic: topic });
-						chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
+						chrome.runtime.sendMessage({type: "send_websocket", key: "topic/remove", value: json}, function(response) {
 							if (chrome.runtime.lastError) {
 								console.error("Error sending message: ", chrome.runtime.lastError);
 							}
