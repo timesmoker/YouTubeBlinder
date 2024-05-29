@@ -19,6 +19,7 @@ const credentials = { key: privateKey, cert: certificate };
 const httpsServer = https.createServer(credentials, app);
 const wss = new WebSocketServer({ server: httpsServer });
 
+
 // HTTPS 서버 리스닝 시작
 httpsServer.listen(2018, () => {
     console.log('HTTPS and WebSocket server is running on port 2018');
