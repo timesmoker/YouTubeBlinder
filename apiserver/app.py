@@ -8,7 +8,6 @@ import scipy.spatial as spatial
 import time
 import unicodedata
 import re
-import faiss
 
 from youtubeapi import load_api_key, get_video_information
 
@@ -29,8 +28,6 @@ def initialize_nlp():
             nlp.initialize_koalanlp()
             initialized = True
 
-
-
 def keep_korean(text):
     # 한글만 남김
     korean_pattern = re.compile('[^가-힣\s]+')
@@ -48,12 +45,14 @@ def send_to_sqlite(data):
 
 
 # FastText 모델 로드
-# model = fasttext.load_model('files/cc.ko.300.bin')
-# apikey = load_api_key('files/api_key.txt')
-model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
-# print("model loaded")
-apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
+model = fasttext.load_model('files/cc.ko.300.bin')
+apikey = load_api_key('files/api_key.txt')
+#model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
+print("model loaded")
+#apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
 print("apikey loaded")
+
+
 print("server is now running")
 initialize_nlp()
 print("nlp initialzied")
@@ -108,7 +107,7 @@ def receive_data():
         max_sim = 0
         total_sim = 0
         description_max_sim = 0
-        descriptionavg_sim = 0
+        description_avg_sim = 0
         topic_vector = model.get_sentence_vector(topic)
         keyword_count = 0
         description_keywords_count = 0
@@ -131,21 +130,33 @@ def receive_data():
             keyword_vector = model.get_sentence_vector(keyword)
             similarity = 1 - spatial.distance.cosine(keyword_vector, topic_vector)
             description_max_sim = max(description_max_sim, similarity)
-            descriptionavg_sim += similarity
+            description_avg_sim += similarity
             description_keywords_count += 1
 
         avg_sim = total_sim / keyword_count if keyword_count > 0 else 0
 
         description_max_sim = description_max_sim * 0.7
-        descriptionavg_sim = descriptionavg_sim * 0.7 / description_keywords_count if description_keywords_count > 0 else 0
+        description_avg_sim = description_avg_sim * 0.7 / description_keywords_count if description_keywords_count > 0 else 0
 
         max_sim = max(max_sim, description_max_sim)
-        avg_sim = max(avg_sim, descriptionavg_sim)
+        avg_sim = max(avg_sim, description_avg_sim)
 
         maxSimList.append(max_sim)
         avgSimList.append(avg_sim)
 
+
+
+
+
     end_time = time.time()
+
+    # Finding the topic with the highest max_sim
+    max_sim_index = maxSimList.index(max(maxSimList))
+    highest_maxSim_topic = topics[max_sim_index]
+    highest_maxSim = maxSimList[max_sim_index]
+
+    if highest_maxSim < 0.5:
+        highest_maxSim_topic = ""
 
     # 소요된 시간 계산
     elapsed_time = end_time - start_time
@@ -158,16 +169,17 @@ def receive_data():
     }
 
     youtube_data = {
+        'table': "today",
         'title': title_keywords,
-        'description': description,
+        'description': description_keywords,
         'video_id': video_id,
         'category': categoryID,
-        'topic': topics,
+        'topic': highest_maxSim_topic,
         'tags': tags,
         # 'thumbnail': thumbnailstring,
         'channel_id': channelID
     }
-    #send_to_sqlite(youtube_data)
+    send_to_sqlite(youtube_data)
 
     # JSON 형태로 응답 반환
     return jsonify(response)
@@ -182,11 +194,55 @@ def shutdown():
 
 @app.route('/notBanned', methods=['POST'])
 def notBanned():
-    data = request.get_json()
-    topic = data.get('topic', '')
-    title = data.get('topic', '')
-    video_id = data.get('video_id', '')
 
+    # JSON 형식의 데이터 수신
+    data = request.get_json()
+    print("Received data:", data)
+
+    # 클라이언트로부터 받은 title 처리
+    title = data.get('title', '')
+    title = unicodedata.normalize('NFC', title)
+    title = keep_korean(title)
+    topic = data.get('topic', '')
+
+    print("제목 가공 후:", title)
+
+    # 비디오 아이디 있으면 확인
+    if 'video_id' in data:
+        video_id = data.get('video_id', '')
+        tags, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
+        print("tags:", tags)
+        print("thumbnailurl:", thumbnailurl)
+        print("description:", description)
+        print("categoryID:", categoryID)  # 이후에 이용예정 일단 받아오는것까지 확인
+        print("channelID:", channelID)
+
+    # 형태소 분석 수행
+    start_time = time.time()
+
+    title_keywords = nlp.analyze_text(title)  # title에서 키워드 추출
+    description_keywords = nlp.analyze_text(description)  # description에서 키워드 추출
+
+    # 시간 측정 종료
+    end_time = time.time()
+
+    # 소요된 시간 계산
+    elapsed_time = end_time - start_time
+    print("형태소 분리에 걸린시간:", elapsed_time, "seconds")
+    print("추출된 키워드:", title_keywords)
+
+    youtube_data = {
+        'table': "today",
+        'title': title_keywords,
+        'description': description_keywords,
+        'video_id': video_id,
+        'category': categoryID,
+        'topic': topic,
+        'tags': tags,
+        # 'thumbnail': thumbnailstring,
+        'channel_id': channelID
+    }
+    send_to_sqlite(youtube_data)
     return
 
 '''
@@ -226,12 +282,12 @@ def adjacency():
 @app.route('/adjacencyTopic',methods=['POST'])
 def adjacencyTopic():
     data = request.get_json()
-    topic_sended = data.get('topic', '')
+    topic_sent = data.get('topic', '')
     topics_all = data.get('topicsAll', '')
     similar_topic = ''
     max_sim = 0
 
-    topicSended_vector = model.get_sentence_vector(topic_sended)
+    topicSended_vector = model.get_sentence_vector(topic_sent)
     for topic in topics_all:
         topic_vector = model.get_sentence_vector(topic)
         similarity = 1 - spatial.distance.cosine(topic_vector, topicSended_vector)
@@ -249,5 +305,5 @@ def adjacencyTopic():
 
 
 if __name__ == "__main__":
-    #app.run(host='0.0.0.0', port=9836)
-    app.run(host='localhost', port=5000)
+    app.run(host='0.0.0.0', port=9836)
+    #app.run(host='localhost', port=5000)
