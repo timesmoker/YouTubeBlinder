@@ -17,6 +17,10 @@
 		"unlimitedStorage",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+		"contextMenus",
+>>>>>>> c83af8f (right click event, direct options.html)
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback"
 	],

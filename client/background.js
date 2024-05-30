@@ -121,3 +121,28 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         sendResponse({value: message.value});
     }
 });
+
+chrome.runtime.onInstalled.addListener(() => {
+	chrome.tabs.create({url: 'options.html'});
+	chrome.contextMenus.create({
+		title: "report to Server", // 메뉴 타이틀
+		id: "sampleMenu", // 식별자
+		contexts: ["all"], // 메뉴가 어떤 타입에 대해 활성화될지 결정
+	});
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+	if (info.menuItemId === "sampleMenu") {
+		// 예를 들어, 클릭된 페이지의 URL 정보를 사용
+		// console.log('Page URL:', info.pageUrl);
+	}
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.type === 'updateContextMenu') {
+		chrome.contextMenus.update("sampleMenu", {
+			title: `report to Server: ${message.text}`
+		});
+		sendResponse({status: 'Menu updated'});
+	}
+});

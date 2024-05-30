@@ -163,7 +163,8 @@ window.addEventListener('load', () => {
 			// video
 			json = JSON.stringify({ path: '/video', title: vidArr[i].title, URL: id });
 			// console.log(json);
-			chrome.runtime.sendMessage({type: "send_websocket", key: "path", value: json}, function(response) {
+			chrome.runtime.sendMessage({type: "send_websocket", key: "/video", value: json}, function(response) {
+				console.log(i);
 				if (chrome.runtime.lastError) {
 					console.error("Error sending message: ", chrome.runtime.lastError);
 				}
@@ -254,6 +255,16 @@ window.addEventListener('load', () => {
 	// socket.onerror = function(error) {
 	// 	console.log('WebSocket Error: ' + error);
 	// };
+});
+
+document.addEventListener('contextmenu', event => {
+	const clickedElement = event.target.parentNode;
+	console.log(clickedElement);
+	let elementText = clickedElement.href;
+	chrome.runtime.sendMessage({
+		type: 'updateContextMenu',
+		text: elementText
+	});
 });
 
 function getVideoTitle(video) {
