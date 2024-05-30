@@ -151,13 +151,13 @@ wss.on('connection', (ws) => {
                         console.log('Server response:', response.data);
 
                         const maxSim = response.data.maxSim;
-                        const totalSim = response.data.totalSim;
+                        const avgSim = response.data.avg_sim;
 
                         let banned = false;
 
                         Array.from(userTopics.keys()).forEach((topic, index) => {
                             const threshold = userTopics.get(topic);
-                            if (blindSim(maxSim[index], totalSim[index], threshold, blockType)) {
+                            if (blindSim(maxSim[index], avgSim[index], threshold, blockType)) {
                                 banned = true;
                             }
                         });
