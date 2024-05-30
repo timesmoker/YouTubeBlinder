@@ -13,7 +13,7 @@ def first_connect_sql():
     conn = pymysql.connect(host='localhost', user='root', password='NewPassw0rd!', db='youtube_data', charset='utf8mb4')
     engine = create_engine('mysql+pymysql://root:NewPassw0rd!@localhost/youtube_data')
 
-def insert_data(table, video_id, video_title, description, tags, channel_id):
+def insert_data(table, video_id, video_title, description, tags, channel_id, category, topic, thumbnail):
     if not conn:
         print("Database connection is not established.")
         return
@@ -22,27 +22,18 @@ def insert_data(table, video_id, video_title, description, tags, channel_id):
     try:
         if table == 'today':
                         
-            # ID가 존재하지 않으면 데이터를 삽입
-            insert_query = "INSERT INTO today_data (id, title, description, tags, channel_id) VALUES (%s, %s, %s, %s, %s)"
-            cur.execute(insert_query, (video_id, video_title, description, tags, channel_id))
+            insert_query = "INSERT INTO today_data (id, title, description, tags, channel_id, category, topic, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            cur.execute(insert_query, (video_id, video_title, description, tags, channel_id, category, topic, thumbnail))
             conn.commit()
             print("Data inserted into today_data table")
-            
-        else:
-            # ID가 learn_data 테이블에 존재하는지 확인
-            check_query = "SELECT COUNT(*) FROM learn_data WHERE id = %s"
-            cur.execute(check_query, (video_id,))
-            result = cur.fetchone()
-            count = result[0]
         
-            if count == 0:
-                # ID가 존재하지 않으면 데이터를 삽입
-                insert_query = "INSERT INTO learn_data (id, title, description, tags, channel_id) VALUES (%s, %s, %s, %s, %s)"
-                cur.execute(insert_query, (video_id, video_title, description, tags, channel_id))
-                conn.commit()
-                print("Data inserted into learn_data table")
-            else:
-                print("ID already exists in learn_data table.")
+        elif table == 'not_banned':
+
+            insert_query = "INSERT INTO not_banned_data (id, title, description, tags, channel_id, category, topic, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            cur.execute(insert_query, (video_id, video_title, description, tags, channel_id, category, topic, thumbnail))
+            conn.commit()
+            print("Data inserted into not_banned_data table")
+              
     except pymysql.MySQLError as e:
         print(f"Error during database operation: {e}")
         conn.rollback()
@@ -53,6 +44,8 @@ def send_data(table, column):
         table = "today"
     elif table == "learn_request":
         table = "learn"
+    elif table == "not_banned_request":
+        table = "not_banned"
 
     if column == "all":
         query = f"SELECT * FROM {table}_data"

@@ -9,19 +9,26 @@ table = "learn_request"
 video_id = ""
 title = ''
 description = ''
+category = ""
+topic = ''
 tags = ""
+thumbnail = ""
+channel_id = ""
 
 # all, title, description 3개 중에 선택
 # output.txt에는 데이터만, original_output.txt에는 json 데이터 그대로 저장
 column = "all"
-channel_id = ""
+
 
 request_data = {
     "table": table,
     "video_id": video_id,
     "title": title,
     "description": description,
+    "category" : category,
+    "topic" : topic,
     "tags": tags,
+    "thumbnail" : thumbnail,
     "column": column,
     "channel_id": channel_id
 }

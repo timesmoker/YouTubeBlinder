@@ -30,19 +30,24 @@ def start_server():
                     video_id = request_data.get("video_id")
                     title = request_data.get("title")
                     description = request_data.get("description")
+                    category = request_data.get("category")
+                    topic = request_data.get("topic")
                     tags = request_data.get("tags")
+                    thumbnail = request_data.get("thumbnail")
                     column = request_data.get("column")
                     channel_id = request_data.get("channel_id")
+                    
+                    
 
-                    if (table == "today" or table == "learn"):
+                    if (table == "today" or table == "not_banned"):
                         start_time = time.time()
 
-                        sql.insert_data(table, video_id, title, description, tags, channel_id)
+                        sql.insert_data(table, video_id, title, description, tags, channel_id, category, topic, thumbnail)
 
                         end_time = time.time()
                         print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
                         
-                    elif (table == "today_request" or table == "learn_request"):
+                    elif (table == "today_request" or table == "learn_request" or table == "not_banned_request"):
                         start_time = time.time()
 
                         # sql에서 데이터 가져오기

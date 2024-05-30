@@ -14,7 +14,7 @@ def move_all_data():
         with conn.cursor() as cursor:
             # 데이터 선택
             select_query = """
-                SELECT id, title, description, tags, channel_id 
+                SELECT id, title, description, tags, channel_id, category, topic, thumbnail
                 FROM today_data
             """
             cursor.execute(select_query)
@@ -39,8 +39,8 @@ def move_all_data():
             if rows_to_insert:
                 # 데이터 삽입
                 insert_query = """
-                    INSERT INTO learn_data (id, title, description, tags, channel_id)
-                    VALUES (%s, %s, %s, %s, %s)
+                    INSERT INTO learn_data (id, title, description, tags, channel_id, category, topic, thumbnail)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 cursor.executemany(insert_query, rows_to_insert)
                 
