@@ -29,6 +29,7 @@ def get_video_information(api_key, video_id):
         'thumbnails'] and 'url' in snippet['thumbnails']['default'] else ''
     description = snippet['description'] if 'description' in snippet else ''
     tags = snippet['tags'] if 'tags' in snippet else []
-    categoryid = snippet['categoryId'] if 'categoryId' in snippet else ''
+    categoryId = snippet['categoryId'] if 'categoryId' in snippet else ''
+    channelId = snippet['channelId'] if 'channelId' in snippet else ''
 
-    return tags, thumbnail, description, categoryid
+    return tags, thumbnail, description, categoryId,channelId

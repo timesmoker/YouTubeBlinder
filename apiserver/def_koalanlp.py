@@ -4,7 +4,10 @@ from koalanlp.proc import Tagger
 
 # KoalaNLP 초기화
 def initialize_koalanlp():
-    initialize(java_options="-Xmx4g", OKT="LATEST")
+    java_options = "-Xmx4g --add-opens java.base/java.util=ALL-UNNAMED"
+    initialize(java_options=java_options, OKT="LATEST")
+
+
 
 # Tagger 객체 생성
 tagger = None

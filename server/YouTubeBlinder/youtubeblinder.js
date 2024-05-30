@@ -25,7 +25,10 @@ httpsServer.listen(2018, () => {
 });
 
 let connectionId = 0;
-const apiURL = 'http://13.125.145.225:9836/simCalculate';  // API 서버 주소
+const apiVideoURL = 'http://13.125.145.225:9836/simCalculate';  // API 서버 주소 => 비디오
+const apiadjacencyURL = 'http://13.125.145.225:9836/adjacency';  // API 서버 주소 => 연관어
+const apiadjacencyTopicURL = 'http://13.125.145.225:9836/adjacencyTopic';  // API 서버 주소 => 연관주제
+const apiNotBannedURL = 'http://13.125.145.225:9836/notBanned';  // API 서버 주소 => 차단안됨
 let topicsAll = new Map();
 
 function addTopic(topicsAll, topic) {
@@ -79,7 +82,7 @@ wss.on('connection', (ws) => {
                         title : req.title,
                         video_id : req.video_id
                     }
-                    axios.post(apiURL, notBannedRequest);
+                    axios.post(apiNotBannedURL, notBannedRequest);
                     break;
 
                 case '/topic/adjacency':
@@ -87,7 +90,7 @@ wss.on('connection', (ws) => {
                         topic: req.topic
                     };
                     try {
-                        const response = await axios.post(apiURL, adjacencyRequest);
+                        const response = await axios.post(apiadjacencyURL, adjacencyRequest);
                         ws.send(JSON.stringify(response.data));
                     } catch (error) {
                         console.error('Failed to process adjacency request:', error);
@@ -97,10 +100,11 @@ wss.on('connection', (ws) => {
 
                 case '/topic/adjacencyTopic':
                     const adjacencyTopicRequest = {
+                        topic : req.topic,
                         topicsAll: topicsAll
                     };
                     try {
-                        const response = await axios.post(apiURL, adjacencyTopicRequest);
+                        const response = await axios.post(apiadjacencyTopicURL, adjacencyTopicRequest);
                         ws.send(JSON.stringify(response.data));
                     } catch (error) {
                         console.error('Failed to process adjacency topic request:', error);
@@ -143,7 +147,7 @@ wss.on('connection', (ws) => {
                     };
 
                     try {
-                        const response = await axios.post(apiURL, apiRequest);
+                        const response = await axios.post(apiVideoURL, apiRequest);
                         console.log('Server response:', response.data);
 
                         const maxSim = response.data.maxSim;
