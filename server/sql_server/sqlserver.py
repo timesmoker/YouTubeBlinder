@@ -40,12 +40,24 @@ def start_server():
                     
 
                     if (table == "today" or table == "not_banned"):
-                        start_time = time.time()
+                        try:
+                            sql.insert_data(table, video_id, title, description, tags, channel_id, category, topic, thumbnail)
+                            end_time = time.time()
+                            print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
 
-                        sql.insert_data(table, video_id, title, description, tags, channel_id, category, topic, thumbnail)
-
-                        end_time = time.time()
-                        print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
+                            # 성공 응답 전송
+                            response_message = {
+                                "status": "success",
+                                "message": f"Data for video_id {video_id} successfully inserted into table {table}."
+                            }
+                            client_socket.sendall(json.dumps(response_message).encode('utf-8'))
+                        except Exception as e:
+                            # 실패 응답 전송
+                            response_message = {
+                                "status": "error",
+                                "message": str(e)
+                            }
+                            client_socket.sendall(json.dumps(response_message).encode('utf-8'))
                         
                     elif (table == "today_request" or table == "learn_request" or table == "not_banned_request"):
                         start_time = time.time()
@@ -67,9 +79,19 @@ def start_server():
                     
                 except json.JSONDecodeError:
                     print("유효하지 않은 요청")
+                    error_message = {
+                        "status": "error",
+                        "message": "Invalid JSON request."
+                    }
+                    client_socket.sendall(json.dumps(error_message).encode('utf-8'))
 
             except Exception as e:
                 print(f"오류 발생: {e}")
+                error_message = {
+                    "status": "error",
+                    "message": str(e)
+                }
+                client_socket.sendall(json.dumps(error_message).encode('utf-8'))
 
             finally:
                 print("클라이언트 연결 종료")
