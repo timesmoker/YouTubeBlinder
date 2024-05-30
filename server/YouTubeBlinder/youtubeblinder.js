@@ -179,6 +179,11 @@ wss.on('connection', (ws) => {
                     blockType = req.blockType;
                     break;
 
+                case '/topic/topTopics':
+                    const topTopics = Array.from(topicsAll.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                    ws.send(JSON.stringify({ path: req.path, topTopics: topTopics }));
+                    break;
+
                 default:
                     throw new Error('Invalid path in request');
             }
