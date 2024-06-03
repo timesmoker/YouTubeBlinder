@@ -1,40 +1,67 @@
-import torch
-from torch import nn
-from torch.utils.data import Dataset, DataLoader, random_split
-from transformers import AdamW, get_cosine_schedule_with_warmup
+import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification
-import os
+from torch.utils.data import Dataset, DataLoader
+import torch
 
-# output.txt 파일 경로
-file_path = 'output.txt'
+# 데이터 읽기
+def read_txt_file(file_path):
+    with open(file_path, 'r', encoding='utf-8-sig') as file:
+        lines = file.readlines()
+    return [line.strip() for line in lines]
 
-# KoBERT 토크나이저 및 모델 로드
+# 데이터 읽기
+data_lines = read_txt_file('kobert_dataset.txt')
+
+# 데이터를 분리하여 데이터프레임 생성
+categories = []
+titles = []
+descriptions = []
+tags_list = []
+
+for line in data_lines:
+    parts = line.split("description: ")
+    description = parts[-1]
+    rest = parts[0].split("tags: ")
+    tags = rest[-1]
+    rest = rest[0].split("title: ")
+    title = rest[-1]
+    category = rest[0].replace("category: ", "")
+    
+    categories.append(category)
+    titles.append(title)
+    descriptions.append(description)
+    tags_list.append(tags)
+
+df = pd.DataFrame({
+    'category': categories,
+    'title': titles,
+    'description': descriptions,
+    'tags': tags_list
+})
+
+df['text'] = df['category'] + ' ' + df['title'] + ' ' + df['tags'] + ' ' + df['description']
+
+# CSV 파일로 저장
+df.to_csv('kobert_single_line_dataset.csv', index=False, encoding='utf-8-sig')
+
+# 데이터셋 로드 및 전처리
+df = pd.read_csv('kobert_single_line_dataset.csv')
 tokenizer = BertTokenizer.from_pretrained('monologg/kobert')
-model = BertForSequenceClassification.from_pretrained('monologg/kobert', num_labels=2)
 
-# 데이터셋 클래스 정의
 class CustomDataset(Dataset):
-    def __init__(self, file_path, tokenizer, max_len):
-        self.data = self.load_data(file_path)
+    def __init__(self, dataframe, tokenizer, max_len):
+        self.dataframe = dataframe
         self.tokenizer = tokenizer
         self.max_len = max_len
 
-    def load_data(self, file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-        data = []
-        for line in lines:
-            line = line.strip()
-            if line:
-                data.append((line, 0))  # 모든 레이블을 0으로 설정
-        return data
-
     def __len__(self):
-        return len(self.data)
+        return len(self.dataframe)
 
-    def __getitem__(self, idx):
-        text, label = self.data[idx]
-        encoding = self.tokenizer(
+    def __getitem__(self, index):
+        row = self.dataframe.iloc[index]
+        text = row['text']
+        
+        encoding = self.tokenizer.encode_plus(
             text,
             add_special_tokens=True,
             max_length=self.max_len,
@@ -42,101 +69,68 @@ class CustomDataset(Dataset):
             padding='max_length',
             truncation=True,
             return_attention_mask=True,
-            return_tensors='pt',
+            return_tensors='pt'
         )
+
         return {
-            'text': text,
             'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'label': torch.tensor(label, dtype=torch.long)
+            'attention_mask': encoding['attention_mask'].flatten()
         }
 
-# 데이터 로드 및 전처리
-dataset = CustomDataset(file_path, tokenizer, max_len=64)
-
-# 데이터셋을 훈련 세트와 테스트 세트로 분할
-train_size = int(0.8 * len(dataset))
-test_size = len(dataset) - train_size
-train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-
-# 데이터 로더 준비
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=32)
-
-# 모델 준비
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = model.to(device)
-
-# Optimizer 및 스케줄러 설정
-optimizer = AdamW(model.parameters(), lr=5e-5)
-total_steps = len(train_dataloader) * 3  # 총 학습 스텝 수
-scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=int(0.1 * total_steps), num_training_steps=total_steps)
-
-# 손실 함수 정의
-loss_fn = nn.CrossEntropyLoss().to(device)
-
-# 정확도 계산 함수
-def calc_accuracy(preds, labels):
-    _, pred_max = torch.max(preds, dim=1)
-    acc = (pred_max == labels).sum().item() / len(preds)
-    return acc
+MAX_LEN = 256
+dataset = CustomDataset(df, tokenizer, MAX_LEN)
+dataloader = DataLoader(dataset, batch_size=2)
 
 # 모델 학습
-for epoch in range(3):
-    model.train()
-    total_train_loss = 0
-    total_train_acc = 0
+model = BertForSequenceClassification.from_pretrained('monologg/kobert')
+optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-5)
+loss_fn = torch.nn.CrossEntropyLoss()
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+model.to(device)
 
-    for batch in train_dataloader:
-        optimizer.zero_grad()
+def train_model(dataloader, model, optimizer, loss_fn, device):
+    model.train()
+    total_loss = 0
+
+    for batch in dataloader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
-        labels = batch['label'].to(device)
-
-        outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+        
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         loss = outputs.loss
-        logits = outputs.logits
 
-        total_train_loss += loss.item()
-        total_train_acc += calc_accuracy(logits, labels)
+        total_loss += loss.item()
 
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        scheduler.step()
 
-    avg_train_loss = total_train_loss / len(train_dataloader)
-    avg_train_acc = total_train_acc / len(train_dataloader)
+    return total_loss / len(dataloader)
 
-    print(f"Epoch {epoch + 1}")
-    print(f"Train loss: {avg_train_loss}, Train accuracy: {avg_train_acc}")
+EPOCHS = 3
+for epoch in range(EPOCHS):
+    train_loss = train_model(dataloader, model, optimizer, loss_fn, device)
+    print(f'Epoch {epoch+1}/{EPOCHS}, Training Loss: {train_loss}')
 
-    # 평가
+# 모델 평가
+def evaluate_model(dataloader, model, loss_fn, device):
     model.eval()
-    total_eval_loss = 0
-    total_eval_acc = 0
+    total_loss = 0
+    correct_predictions = 0
 
     with torch.no_grad():
-        for batch in test_dataloader:
+        for batch in dataloader:
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
-            labels = batch['label'].to(device)
+            
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            loss = loss_fn(outputs.logits, torch.tensor([1]*len(outputs.logits)).to(device))
+            
+            total_loss += loss.item()
+            _, preds = torch.max(outputs.logits, dim=1)
+            correct_predictions += torch.sum(preds == torch.tensor([1]*len(preds)).to(device))
 
-            outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-            loss = outputs.loss
-            logits = outputs.logits
+    return total_loss / len(dataloader), correct_predictions.double() / len(dataloader.dataset)
 
-            total_eval_loss += loss.item()
-            total_eval_acc += calc_accuracy(logits, labels)
-
-    avg_eval_loss = total_eval_loss / len(test_dataloader)
-    avg_eval_acc = total_eval_acc / len(test_dataloader)
-
-    print(f"Validation loss: {avg_eval_loss}, Validation accuracy: {avg_eval_acc}")
-
-"""
-# 파인튜닝된 모델 저장 (잠깐 주석처리)
-model_path = './fine_tuned_kobert'
-os.makedirs(model_path, exist_ok=True)
-model.save_pretrained(model_path)
-tokenizer.save_pretrained(model_path)
-"""
+eval_loss, eval_accuracy = evaluate_model(dataloader, model, loss_fn, device)
+print(f'Evaluation Loss: {eval_loss}, Evaluation Accuracy: {eval_accuracy}')

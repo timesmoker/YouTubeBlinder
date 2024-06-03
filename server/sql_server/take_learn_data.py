@@ -1,17 +1,18 @@
 import socket
 import json
 import gzip
+import pandas as pd
 
 host = "13.125.145.225"
 port = 8870
 
-table = "learn_request"
+table = "today_request"
 video_id = ""
 title = ''
 description = ''
 category = ""
 topic = ''
-tags = ""
+tags = ''
 thumbnail = ""
 channel_id = ""
 
@@ -19,6 +20,8 @@ channel_id = ""
 # output.txt에는 데이터만, original_output.txt에는 json 데이터 그대로 저장
 column = "all"
 
+#fasttext 또는 kobert 선택
+learn_style = "fasttext"
 
 request_data = {
     "table": table,
@@ -57,24 +60,114 @@ if (table == "today_request" or table == "learn_request"):
     decompressed_data = gzip.decompress(received_data)
     json_data = json.loads(decompressed_data.decode('utf-8'))
 
-    # "title"과 "description"만 추출하여 텍스트 파일로 저장
-    lines = []
-    for item in json_data:
-        if "title" in item:
-            lines.append(item["title"])
-        if "description" in item:
-            lines.append(item["description"])
-    
-    with open('output.txt', 'w', encoding='utf-8') as f:
-        for line in lines:
-            f.write(line + '\n')
+    if learn_style == "fasttext":
+        # "category", "title", "description", "tags"를 추출하여 리스트로 저장
+        categories = []
+        titles = []
+        descriptions = []
+        tags_list = []
+        title_lines = []
+        description_lines = []
+        tags_lines = []
 
-    print("title과 description이 output.txt 파일에 저장되었습니다.")
+        for item in json_data:
+            if "category" in item:
+                if "title" in item:
+                    categories.append(item["category"])
+                    titles.append(item["title"])
+                    title_lines.append(f'__label__{item["category"]} {item["title"]}')
+                if "description" in item:
+                    descriptions.append(item["description"])
+                    description_lines.append(f'__label__{item["category"]} {item["description"]}')
+                if "tags" in item:
+                    # tags 문자열에서 대괄호 제거
+                    tags = item["tags"].strip("[]").replace("'", "").replace(",", "")
+                    tags_list.append(tags)
+                    tags_lines.append(f'__label__{item["category"]} {tags}')
 
-    # 원본 데이터를 텍스트 파일로 저장
-    with open('original_output.txt', 'w', encoding='utf-8') as f:
-        json.dump(json_data, f, ensure_ascii=False, indent=4)
+        # 데이터프레임 생성
+        title_df = pd.DataFrame({'category': categories, 'title': titles})
+        description_df = pd.DataFrame({'category': categories, 'description': descriptions})
+        tags_df = pd.DataFrame({'category': categories, 'tags': tags_list})
 
-    print("원본 데이터가 original_output.txt 파일에 저장되었습니다.")
+        # CSV 파일로 저장
+        title_df.to_csv('output_category_title.csv', index=False, encoding='utf-8-sig')
+        description_df.to_csv('output_category_description.csv', index=False, encoding='utf-8-sig')
+        tags_df.to_csv('output_category_tags.csv', index=False, encoding='utf-8-sig')
+
+        print("category와 title이 output_category_title.csv 파일에 저장되었습니다.")
+        print("category와 description이 output_category_description.csv 파일에 저장되었습니다.")
+        print("category와 tags가 output_category_tags.csv 파일에 저장되었습니다.")
+
+        # title 텍스트 파일로 저장
+        with open('output_category_title.txt', 'w', encoding='utf-8') as f:
+            for line in title_lines:
+                f.write(line + '\n')
+
+        print("category와 title이 __label__ 형식으로 output_category_title.txt 파일에 저장되었습니다.")
+
+        # description 텍스트 파일로 저장
+        with open('output_category_description.txt', 'w', encoding='utf-8') as f:
+            for line in description_lines:
+                f.write(line + '\n')
+
+        print("category와 description이 __label__ 형식으로 output_category_description.txt 파일에 저장되었습니다.")
+
+        # tags 텍스트 파일로 저장
+        with open('output_category_tags.txt', 'w', encoding='utf-8') as f:
+            for line in tags_lines:
+                f.write(line + '\n')
+
+        print("category와 tags가 __label__ 형식으로 output_category_tags.txt 파일에 저장되었습니다.")
+
+        # 원본 데이터를 텍스트 파일로 저장
+        with open('original_output.txt', 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, ensure_ascii=False, indent=4)
+
+        print("원본 데이터가 original_output.txt 파일에 저장되었습니다.")
+
+    elif learn_style == "kobert":
+        # KoBERT 학습을 위한 데이터 처리
+        categories = []
+        titles = []
+        descriptions = []
+        tags_list = []
+
+        for item in json_data:
+            if "category" in item:
+                categories.append(item["category"])
+                if "title" in item:
+                    titles.append(item["title"])
+                else:
+                    titles.append("")
+                if "description" in item:
+                    descriptions.append(item["description"])
+                else:
+                    descriptions.append("")
+                if "tags" in item:
+                    tags = item["tags"].strip("[]").replace("'", "").replace(",", "")
+                    tags_list.append(tags)
+                else:
+                    tags_list.append("")
+
+        # 데이터프레임 생성
+        df = pd.DataFrame({
+            'category': categories,
+            'title': titles,
+            'description': descriptions,
+            'tags': tags_list
+        })
+
+        # CSV 파일로 저장
+        df.to_csv('kobert_dataset.csv', index=False, encoding='utf-8-sig')
+        print("KoBERT 학습을 위한 데이터가 kobert_dataset.csv 파일에 저장되었습니다.")
+
+        # TXT 파일로 저장
+        with open('kobert_dataset.txt', 'w', encoding='utf-8-sig') as file:
+            for i in range(len(df)):
+                line = f"category: {df.iloc[i]['category']} title: {df.iloc[i]['title']} tags: {df.iloc[i]['tags']} description: {df.iloc[i]['description']}\n"
+                file.write(line)
+
+        print("KoBERT 학습을 위한 데이터가 kobert_dataset.txt 파일에 저장되었습니다.")
 
 client_socket.close()

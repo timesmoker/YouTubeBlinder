@@ -14,6 +14,7 @@ def first_connect_sql():
     engine = create_engine('mysql+pymysql://root:NewPassw0rd!@localhost/youtube_data')
 
 def insert_data(table, video_id, video_title, description, tags, channel_id, category, topic, thumbnail):
+    tags = str(tags)
     if not conn:
         print("Database connection is not established.")
         return
