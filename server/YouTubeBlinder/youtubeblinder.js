@@ -46,7 +46,6 @@ function removeTopic(topicsAll, topic) {
     } else {
         topicsAll.delete(topic);
     }
-
 }
 
 wss.on('connection', (ws) => {
@@ -75,13 +74,12 @@ wss.on('connection', (ws) => {
             }
 
             switch (req.path) {
-
-                case  '/notBanned':
-                    const notBannedRequest ={
-                        topic : req.topic,
-                        title : req.title,
-                        video_id : req.video_id
-                    }
+                case '/notBanned':
+                    const notBannedRequest = {
+                        topic: req.topic,
+                        title: req.title,
+                        video_id: req.video_id
+                    };
                     axios.post(apiNotBannedURL, notBannedRequest);
                     break;
 
@@ -100,7 +98,7 @@ wss.on('connection', (ws) => {
 
                 case '/topic/adjacencyTopic':
                     const adjacencyTopicRequest = {
-                        topic : req.topic,
+                        topic: req.topic,
                         topicsAll: topicsAll
                     };
                     try {
@@ -146,6 +144,12 @@ wss.on('connection', (ws) => {
                         topic: Array.from(userTopics.keys())
                     };
 
+                    if (apiRequest.topic.length === 0) {
+                        console.log('No topics available for video analysis.');
+                        ws.send(JSON.stringify({ path: req.path, title: title, error: 'No topics available for video analysis' }));
+                        break;
+                    }
+
                     try {
                         const response = await axios.post(apiVideoURL, apiRequest);
                         console.log('Server response:', response.data);
@@ -175,6 +179,7 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
+
                 case '/blockType':
                     blockType = req.blockType;
                     break;
@@ -188,16 +193,11 @@ wss.on('connection', (ws) => {
                     throw new Error('Invalid path in request');
             }
         } catch (error) {
-            console.error('Failed to process message', error.message);
+            console.error('Failed to process message:', error.message);
             console.error('Received data:', data);
-
-            // 오류를 서버 콘솔에 출력
-            console.log('Invalid message received from client:', data);
-            console.log('Error:', error.message);
+            ws.send(JSON.stringify({ error: 'Failed to process message', details: error.message }));
         }
     });
-
-
 
     ws.on('close', () => {
         console.log('Client', thisID, 'disconnected');
