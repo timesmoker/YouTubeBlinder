@@ -72,6 +72,8 @@ def receive_data():
 
     print("제목 가공 후:", title)
 
+    description = ''
+
     # 비디오 아이디 있으면 확인
     if 'video_id' in data:
         video_id = data.get('video_id', '')
@@ -81,6 +83,8 @@ def receive_data():
         print("description:", description)
         print("categoryID:", categoryID)  # 이후에 이용예정 일단 받아오는것까지 확인
         print("channelID:", channelID)
+
+
 
     # 형태소 분석 수행
     start_time = time.time()
@@ -170,8 +174,8 @@ def receive_data():
 
     youtube_data = {
         'table': "today",
-        'title': title_keywords,
-        'description': description_keywords,
+        'title': title,
+        'description': description,
         'video_id': video_id,
         'category': categoryID,
         'topic': highest_maxSim_topic,
