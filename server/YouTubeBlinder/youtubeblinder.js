@@ -10,6 +10,7 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
+
 const privateKey = fs.readFileSync('../Key/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('../Key/fullchain.pem', 'utf8');
 
