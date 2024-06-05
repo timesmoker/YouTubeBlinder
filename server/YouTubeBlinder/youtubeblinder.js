@@ -116,14 +116,14 @@ wss.on('connection', (ws) => {
                         removeTopic(topicsAll, topic);
                     }
                     for (let i = 0; i < req.topics.length; i++) {
-                        userTopics.set(req.topics[i], ((req.threshold / 10)+35));
+                        userTopics.set(req.topics[i], (40-(req.threshold / 10)));
                         addTopic(topicsAll, req.topics[i]);
                     }
                     break;
 
                 case '/topic/add':
                     if (!userTopics.has(req.topic)) {
-                        userTopics.set(req.topic, ((req.threshold / 10)+35));
+                        userTopics.set(req.topic, (40-(req.threshold / 10)));
                         addTopic(topicsAll, req.topic);
                     }
                     break;
