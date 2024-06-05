@@ -115,14 +115,14 @@ wss.on('connection', (ws) => {
                         removeTopic(topicsAll, topic);
                     }
                     for (let i = 0; i < req.topics.length; i++) {
-                        userTopics.set(req.topics[i], (req.threshold[i] / 100));
+                        userTopics.set(req.topics[i], ((req.threshold / 10)+35));
                         addTopic(topicsAll, req.topics[i]);
                     }
                     break;
 
                 case '/topic/add':
                     if (!userTopics.has(req.topic)) {
-                        userTopics.set(req.topic, (req.threshold / 100));
+                        userTopics.set(req.topic, ((req.threshold / 10)+35));
                         addTopic(topicsAll, req.topic);
                     }
                     break;
@@ -136,11 +136,11 @@ wss.on('connection', (ws) => {
 
                 case '/video':
                     const title = req.title;
-                    console.log('videoId:', req.videoId);
+                    console.log('video_id:', req.video_id);
 
                     const apiRequest = {
                         title: title,
-                        video_id: req.videoId,
+                        video_id: req.video_id,
                         topic: Array.from(userTopics.keys())
                     };
 
