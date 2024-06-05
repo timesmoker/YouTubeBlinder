@@ -6,7 +6,7 @@ import pandas as pd
 host = "13.125.145.225"
 port = 8870
 
-table = "today_request"
+table = "learn_request"
 video_id = ""
 title = ''
 description = ''
@@ -15,10 +15,11 @@ topic = ''
 tags = ''
 thumbnail = ""
 channel_id = ""
+column = "all"
 
 # all, title, description 3개 중에 선택
 # output.txt에는 데이터만, original_output.txt에는 json 데이터 그대로 저장
-column = "all"
+
 
 #fasttext 또는 kobert 선택
 learn_style = "fasttext"
