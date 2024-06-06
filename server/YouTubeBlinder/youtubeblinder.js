@@ -55,7 +55,8 @@ async function addTopic(topicsAll, topic) {
                 // 관련 키워드에 저장
                 topicAdjacentKeywords.set(topic, response.data.keyword);
                 console.log('Adjacent keywords for', topic, ':', response.data.keyword)
-                topicAdjacentSim.set(topic, response.data.similarity);
+                topicAdjacentSim.set(topic, (0.45 - response.data.similarity) / 0.0008);
+
             } else {
                 // 예기치 않은 응답 처리
                 console.warn('Unexpected response structure:', response.data);
