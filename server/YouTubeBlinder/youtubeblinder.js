@@ -246,6 +246,9 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
+        for (let topic of userTopics.keys()) {
+            removeTopic(topicsAll, topic);
+        }
         console.log('Client', thisID, 'disconnected');
     });
 
