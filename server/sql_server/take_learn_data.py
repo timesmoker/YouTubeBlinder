@@ -171,4 +171,5 @@ if (table == "today_request" or table == "learn_request"):
 
         print("KoBERT 학습을 위한 데이터가 kobert_dataset.txt 파일에 저장되었습니다.")
 
+
 client_socket.close()

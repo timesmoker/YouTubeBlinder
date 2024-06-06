@@ -3,6 +3,7 @@ import json
 import sql_func as sql  # 'sql_func' 모듈을 사용하여 SQL 함수 호출
 import time
 import gzip
+from threading import Timer
 
 def start_server():
     host = "0.0.0.0"
@@ -13,6 +14,13 @@ def start_server():
     server_socket.listen(5)
     sql.first_connect_sql()
     print(f"서버가 {host}:{port}에서 대기 중입니다...")
+
+    def reset_connection_periodically():
+        sql.reset_connection()
+        Timer(3600, reset_connection_periodically).start()  # 1시간(3600초)마다 연결 재설정
+
+    # 주기적 연결 재설정 시작
+    Timer(3600, reset_connection_periodically).start()
 
     try:
         while True:
@@ -37,8 +45,6 @@ def start_server():
                     column = request_data.get("column")
                     channel_id = request_data.get("channel_id")
                     
-                    
-
                     if (table == "today" or table == "not_banned"):
                         try:
                             sql.insert_data(table, video_id, title, description, tags, channel_id, category, topic, thumbnail)

@@ -13,6 +13,15 @@ def first_connect_sql():
     conn = pymysql.connect(host='localhost', user='root', password='NewPassw0rd!', db='youtube_data', charset='utf8mb4')
     engine = create_engine('mysql+pymysql://root:NewPassw0rd!@localhost/youtube_data')
 
+def reset_connection():
+    global conn, engine
+    if conn:
+        conn.close()
+        print("Database connection closed for reset")
+    conn = pymysql.connect(host='localhost', user='root', password='NewPassw0rd!', db='youtube_data', charset='utf8mb4')
+    engine = create_engine('mysql+pymysql://root:NewPassw0rd!@localhost/youtube_data')
+    print("Database connection reset successfully")
+
 def insert_data(table, video_id, video_title, description, tags, channel_id, category, topic, thumbnail):
     tags = str(tags)
     if not conn:
@@ -22,14 +31,12 @@ def insert_data(table, video_id, video_title, description, tags, channel_id, cat
     cur = conn.cursor()
     try:
         if table == 'today':
-                        
             insert_query = "INSERT INTO today_data (id, title, description, tags, channel_id, category, topic, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             cur.execute(insert_query, (video_id, video_title, description, tags, channel_id, category, topic, thumbnail))
             conn.commit()
             print("Data inserted into today_data table")
         
         elif table == 'not_banned':
-
             insert_query = "INSERT INTO not_banned_data (id, title, description, tags, channel_id, category, topic, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             cur.execute(insert_query, (video_id, video_title, description, tags, channel_id, category, topic, thumbnail))
             conn.commit()
@@ -53,7 +60,6 @@ def send_data(table, column):
     else:
         query = f"SELECT {column} FROM {table}_data"
     
-
     try:
         df = pd.read_sql(query, engine)
 

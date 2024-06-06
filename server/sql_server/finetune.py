@@ -95,15 +95,17 @@ def train_model(dataloader, model, optimizer, loss_fn, device):
     for batch in dataloader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
-        
-        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+        labels = torch.tensor([1]*input_ids.size(0)).to(device)  # 임의의 레이블 설정
+
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
         loss = outputs.loss
 
-        total_loss += loss.item()
+        if loss is not None:
+            total_loss += loss.item()
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
     return total_loss / len(dataloader)
 
@@ -112,25 +114,6 @@ for epoch in range(EPOCHS):
     train_loss = train_model(dataloader, model, optimizer, loss_fn, device)
     print(f'Epoch {epoch+1}/{EPOCHS}, Training Loss: {train_loss}')
 
-# 모델 평가
-def evaluate_model(dataloader, model, loss_fn, device):
-    model.eval()
-    total_loss = 0
-    correct_predictions = 0
-
-    with torch.no_grad():
-        for batch in dataloader:
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            
-            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-            loss = loss_fn(outputs.logits, torch.tensor([1]*len(outputs.logits)).to(device))
-            
-            total_loss += loss.item()
-            _, preds = torch.max(outputs.logits, dim=1)
-            correct_predictions += torch.sum(preds == torch.tensor([1]*len(preds)).to(device))
-
-    return total_loss / len(dataloader), correct_predictions.double() / len(dataloader.dataset)
-
-eval_loss, eval_accuracy = evaluate_model(dataloader, model, loss_fn, device)
-print(f'Evaluation Loss: {eval_loss}, Evaluation Accuracy: {eval_accuracy}')
+# 모델 저장
+model.save_pretrained('trained_kobert_model')
+tokenizer.save_pretrained('trained_kobert_tokenizer')
