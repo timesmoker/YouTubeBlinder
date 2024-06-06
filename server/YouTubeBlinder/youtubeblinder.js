@@ -66,6 +66,9 @@ async function addTopic(topicsAll, topic) {
                 console.warn('Unexpected response structure:', response.data);
                 topicAdjacentKeywords.set(topic, []);
             }
+        } catch (error) {
+            console.error('Error fetching adjacent keywords:', error);
+            topicAdjacentKeywords.set(topic, []);
         }
     }
 }
