@@ -249,39 +249,51 @@ def notBanned():
     send_to_sqlite(youtube_data)
     return
 
-'''
+
 @app.route('/adjacency', methods=['POST'])
 def adjacency():
     data = request.get_json()
     topic = data.get('topic', '')
 
     # num_neighbors와 num_select는 쿼리 파라미터로부터 가져옴, 기본값은 30과 20
-    num_neighbors = 30
+    num_neighbors = 200  # initial number of neighbors to search
+    increment_neighbors = 100
     num_select = 20
 
     topic_vector = model.get_sentence_vector(topic)
 
-    # 주어진 토픽과 유사한 단어 찾기
-    nearest_neighbors = model.get_nearest_neighbors(topic_vector, k=num_neighbors)
-    similar_words = [neighbor for neighbor in nearest_neighbors]
+    filtered_words = []
+    while True:
+        similar_words = model.get_nearest_neighbors(topic, k=num_neighbors)
 
-    # 0.05 단위로 가장 가까운 단어 선택
-    selected_topics = []
-    previous_similarity = None
-    for similarity, word in similar_words:
-        if len(selected_topics) >= num_select:
+        # 0.35와 0.45 사이의 단어 선택
+        filtered_words = [neighbor for neighbor in similar_words if 0.35 <= neighbor[0] <= 0.45]
+
+        # 만약 필터링된 단어가 있고 최소 유사도가 0.35 이상이면 반복문 종료
+        if filtered_words and filtered_words[0][0] >= 0.35:
             break
-        if previous_similarity is None or abs(previous_similarity - similarity) >= 0.05:
-            selected_topics.append(word)
-            previous_similarity = similarity
+
+        # 1000개 이상의 유사 단어가 검색되면 반복문 종료 -> 무한 반복 방지
+        if num_neighbors >= 1000:
+            break
+
+        # 찾고자 하는 유사 단어의 수를 늘림
+        num_neighbors += increment_neighbors
+
+    # 0.005 단위로 가장 가까운 단어 선택
+    selected_topics = []
+    for target_similarity in [0.35 + i * 0.005 for i in range(20)]:
+        closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
+        if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
+            selected_topics.append(closest_word)
 
     response = {
         "path": '/topic/adjacency',
-        "topic": selected_topics
+        "topic": [word[1] for word in selected_topics]
     }
 
     return jsonify(response)
-'''
+
 
 @app.route('/adjacencyTopic',methods=['POST'])
 def adjacencyTopic():

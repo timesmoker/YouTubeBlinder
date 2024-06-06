@@ -31,12 +31,37 @@ const apiadjacencyURL = 'http://13.125.145.225:9836/adjacency';  // API 서버 �
 const apiadjacencyTopicURL = 'http://13.125.145.225:9836/adjacencyTopic';  // API 서버 주소 => 연관주제
 const apiNotBannedURL = 'http://13.125.145.225:9836/notBanned';  // API 서버 주소 => 차단안됨
 let topicsAll = new Map();
+let topicAdjacentKeywords = new Map();
 
-function addTopic(topicsAll, topic) {
+async function addTopic(topicsAll, topic) {
     if (topicsAll.has(topic)) {
+        // 있으면 1 증가
         topicsAll.set(topic, topicsAll.get(topic) + 1);
     } else {
+        // 없으면 1로 설정
         topicsAll.set(topic, 1);
+
+        // 일단 빈 배열로 초기화
+        topicAdjacentKeywords.set(topic, []);
+
+        const apiRequest = { topic: topic };
+
+        try {
+
+            const response = await axios.post(apiadjacencyURL, apiRequest);
+
+            if (response.data && response.data.topic) {
+                // 관련 키워드에 저장
+                topicAdjacentKeywords.set(topic, response.data.topic);
+            } else {
+                // 예기치 않은 응답 처리
+                console.warn('Unexpected response structure:', response.data);
+                topicAdjacentKeywords.set(topic, []);
+            }
+        } catch (error) {
+            console.error('Error fetching adjacent keywords:', error);
+            topicAdjacentKeywords.set(topic, []);
+        }
     }
 }
 
@@ -46,6 +71,7 @@ function removeTopic(topicsAll, topic) {
         topicsAll.set(topic, currentCount - 1);
     } else {
         topicsAll.delete(topic);
+    topicAdjacentKeywords.delete(topic);
     }
 }
 
