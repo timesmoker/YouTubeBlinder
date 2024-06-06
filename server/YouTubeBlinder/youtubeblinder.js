@@ -53,6 +53,7 @@ async function addTopic(topicsAll, topic) {
             if (response.data && response.data.topic) {
                 // 관련 키워드에 저장
                 topicAdjacentKeywords.set(topic, response.data.topic);
+                console.log('Adjacent keywords for', topic, ':', response.data.topic)
             } else {
                 // 예기치 않은 응답 처리
                 console.warn('Unexpected response structure:', response.data);
@@ -139,14 +140,14 @@ wss.on('connection', (ws) => {
                         removeTopic(topicsAll, topic);
                     }
                     for (let i = 0; i < req.topics.length; i++) {
-                        userTopics.set(req.topics[i], (0.45-(req.threshold *0.001)));
+                        userTopics.set(req.topics[i], (0.45-(req.threshold *0.0008)));
                         addTopic(topicsAll, req.topics[i]);
                     }
                     break;
 
                 case '/topic/add':
                     if (!userTopics.has(req.topic)) {
-                        userTopics.set(req.topic, (0.45-(req.threshold *0.001)));
+                        userTopics.set(req.topic, (0.45-(req.threshold *0.0008)));
                         addTopic(topicsAll, req.topic);
                     }
                     break;

@@ -270,7 +270,7 @@ def adjacency():
         filtered_words = [neighbor for neighbor in similar_words if 0.35 <= neighbor[0] <= 0.45]
 
         # 만약 필터링된 단어가 있고 최소 유사도가 0.35 이상이면 반복문 종료
-        if filtered_words and filtered_words[0][0] >= 0.35:
+        if filtered_words and filtered_words[0][0] >= 0.37:
             break
 
         # 1000개 이상의 유사 단어가 검색되면 반복문 종료 -> 무한 반복 방지
