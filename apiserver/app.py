@@ -75,7 +75,7 @@ def receive_data():
 
     if 'video_id' in data:
         video_id = data.get('video_id', '')
-        tags, thumbnailurl, description, categoryID, channelID = get_video_information("apikey", video_id)
+        tags, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
         print("tags:", tags)
         print("thumbnailurl:", thumbnailurl)
         print("description:", description)

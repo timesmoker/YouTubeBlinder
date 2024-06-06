@@ -43,8 +43,12 @@ async function addTopic(topicsAll, topic) {
         topicsAll.set(topic, 1);
 
         // 일단 빈 배열로 초기화
-        topicAdjacentKeywords.set(topic, []);
 
+        if(topicAdjacentKeywords.has(topic)&&topicAdjacentSim.has(topic)){
+            return;
+        }
+
+        topicAdjacentKeywords.set(topic, []);
         const apiRequest = { topic: topic };
 
         try {
@@ -95,8 +99,6 @@ function removeTopic(topicsAll, topic) {
     } else {
         console.log('Removing topic', topic);
         topicsAll.delete(topic);
-        topicAdjacentKeywords.delete(topic);
-        topicAdjacentSim.delete(topic);
     }
 }
 
