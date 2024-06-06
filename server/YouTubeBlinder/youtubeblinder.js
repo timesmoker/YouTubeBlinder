@@ -111,15 +111,12 @@ wss.on('connection', (ws) => {
                     break;
 
                 case '/topic/adjacency':
-                    const adjacencyRequest = {
-                        topic: req.topic
-                    };
-                    try {
-                        const response = await axios.post(apiadjacencyURL, adjacencyRequest);
-                        ws.send(JSON.stringify(response.data));
-                    } catch (error) {
-                        console.error('Failed to process adjacency request:', error);
-                        ws.send(JSON.stringify({ error: 'Failed to process adjacency request', details: error.message }));
+                    const topic = req.topic;
+
+                    if (topicAdjacentKeywords.has(topic)) {
+                        // Send the cached data
+                        const cachedData = topicAdjacentKeywords.get(topic);
+                        ws.send(JSON.stringify({ path: '/topic/adjacency', topic: cachedData }));
                     }
                     break;
 
