@@ -58,7 +58,7 @@ async function addTopic(topicsAll, topic) {
                 response.data.topics.forEach((topicObj) => {
                     const keyword = topicObj.keyword;
                     const similarity = topicObj.similarity;
-                    const adjustedSimilarity = ( similarity-0.37) / 0.0008;
+                    const adjustedSimilarity = ( 0.45 - similarity) / 0.0008;
 
                     keywords.push(keyword);
                     similarities.push(adjustedSimilarity);

@@ -290,9 +290,10 @@ def adjacency():
         if num_neighbors >= max_neighbors:
             print("Reached maximum number of neighbors, selecting closest topics")
 
-            # 최소 유사도에서 범위에 가장 가까운 20개의 키워드 선택
+            # 유사도 범위에서 20개의 키워드 선택
             min_similarity = min(filtered_words, key=lambda x: x[0])[0]
-            interval = (0.45 - min_similarity) / num_select
+            max_similarity = max(filtered_words, key=lambda x: x[0])[0]
+            interval = (max_similarity - min_similarity) / num_select
 
             for i in range(num_select):
                 target_similarity = min_similarity + i * interval
