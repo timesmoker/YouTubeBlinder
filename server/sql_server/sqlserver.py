@@ -28,11 +28,12 @@ def start_server():
             print(f"클라이언트 {client_address}가 연결되었습니다.")
             
             try:
-                data = client_socket.recv(4096).decode("utf-8")
+                data = client_socket.recv(10240)
                 if not data:
                     continue
 
                 try:
+                    data = gzip.decompress(data).decode("utf-8")
                     request_data = json.loads(data)
                     table = request_data.get("table")
                     video_id = request_data.get("video_id")
@@ -44,12 +45,13 @@ def start_server():
                     thumbnail = request_data.get("thumbnail")
                     column = request_data.get("column")
                     channel_id = request_data.get("channel_id")
+
                     
+                    tags = str(tags)
+
                     if (table == "today" or table == "not_banned"):
                         try:
                             sql.insert_data(table, video_id, title, description, tags, channel_id, category, topic, thumbnail)
-                            end_time = time.time()
-                            print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
 
                             # 성공 응답 전송
                             response_message = {
@@ -66,20 +68,15 @@ def start_server():
                             client_socket.sendall(json.dumps(response_message).encode('utf-8'))
                         
                     elif (table == "today_request" or table == "learn_request" or table == "not_banned_request"):
-                        start_time = time.time()
-
                         # sql에서 데이터 가져오기
                         response = sql.send_data(table, column)
-
-                        end_time = time.time()
-                        print(f"time elapsed : {int(round((end_time - start_time) * 1000))}ms")
 
                         # 데이터 길이 보내기
                         data_length = len(response)
                         client_socket.sendall(data_length.to_bytes(8, 'big'))
 
-                        # 데이터를 10MB 청크로 나누어 전송
-                        chunk_size = 10 * 1024 * 1024
+                        # 데이터를 20MB 청크로 나누어 전송
+                        chunk_size = 20 * 1024 * 1024
                         for i in range(0, data_length, chunk_size):
                             client_socket.sendall(response[i:i + chunk_size])
                     
