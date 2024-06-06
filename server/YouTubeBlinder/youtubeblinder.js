@@ -39,7 +39,7 @@ async function addTopic(topicsAll, topic) {
         // 있으면 1 증가
         topicsAll.set(topic, topicsAll.get(topic) + 1);
     } else {
-        // 없으면 1로 설정
+        // 없으면 1로 설정 + 연관어 추가
         topicsAll.set(topic, 1);
 
         // 일단 빈 배열로 초기화
@@ -58,7 +58,7 @@ async function addTopic(topicsAll, topic) {
                 response.data.topics.forEach((topicObj) => {
                     const keyword = topicObj.keyword;
                     const similarity = topicObj.similarity;
-                    const adjustedSimilarity = (0.45 - similarity) / 0.0008;
+                    const adjustedSimilarity = ( similarity-0.37) / 0.0008;
 
                     keywords.push(keyword);
                     similarities.push(adjustedSimilarity);
@@ -87,9 +87,13 @@ async function addTopic(topicsAll, topic) {
 
 function removeTopic(topicsAll, topic) {
     let currentCount = topicsAll.get(topic);
+    console.log('Current count for topic', topic, 'is', currentCount);
+
     if (currentCount > 1) {
+        console.log('Decreasing count for topic', topic, 'from', currentCount, 'to', currentCount - 1)
         topicsAll.set(topic, currentCount - 1);
     } else {
+        console.log('Removing topic', topic);
         topicsAll.delete(topic);
         topicAdjacentKeywords.delete(topic);
         topicAdjacentSim.delete(topic);
