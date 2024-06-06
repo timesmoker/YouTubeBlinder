@@ -175,19 +175,13 @@ wss.on('connection', (ws) => {
 
                 case '/topic/whiteList':
                     let topicToWhite = req.topic;   // 화이트리스트 할 토픽
-                    if(req.whiteList === undefined){
-                        console.error("화이트 리스트 없음");
-                        break;
-                    }
-                    if(req.whiteList.length === 0){
-                        console.error("화이트 리스트 없음");
-                        break;
-                    }
                     if (!topicWhiteList.has(topicToWhite)) {
                         topicWhiteList.set(topicToWhite, []); // 새로운 토픽을 빈 배열로 초기화
                     }
                     if (req.whiteList && Array.isArray(req.whiteList)) { // req.whiteList가 정의되어 있고 배열인지 확인
-                        Array.prototype.push.apply(topicWhiteList.get(topicToWhite), req.whiteList);
+                        for (let i = 0; i < req.whiteList.length; i++) {
+                            topicWhiteList.get(topicToWhite).push(req.whiteList[i]);
+                        }
                     } else {
                         console.error("Invalid whiteList provided");
                     }
