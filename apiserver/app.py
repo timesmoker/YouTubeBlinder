@@ -273,8 +273,8 @@ def adjacency():
         if filtered_words and min(filtered_words, key=lambda x: x[0])[0] <= 0.37:
 
             # 유사도 범위에서 20개의 키워드 선택
-            min_similarity = 0.37
-            max_similarity = 0.45
+            min_similarity = min(filtered_words, key=lambda x: x[0])[0]
+            max_similarity = max(filtered_words, key=lambda x: x[0])[0]
             interval = (max_similarity - min_similarity) / num_select
 
             for i in range(num_select):
