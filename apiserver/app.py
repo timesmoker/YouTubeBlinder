@@ -45,11 +45,11 @@ def send_to_sqlite(data):
 
 
 # FastText 모델 로드
-#model = fasttext.load_model('files/cc.ko.300.bin')
-#apikey = load_api_key('files/api_key.txt')
-model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
+model = fasttext.load_model('files/cc.ko.300.bin')
+apikey = load_api_key('files/api_key.txt')
+#model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
 print("model loaded")
-apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
+#apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
 print("apikey loaded")
 
 
@@ -341,5 +341,5 @@ def adjacencyTopic():
 
 
 if __name__ == "__main__":
-    #app.run(host='0.0.0.0', port=9836)
-    app.run(host='localhost', port=5000)
+    app.run(host='0.0.0.0', port=9836)
+    #app.run(host='localhost', port=5000)

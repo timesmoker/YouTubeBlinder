@@ -51,20 +51,21 @@ async function addTopic(topicsAll, topic) {
 
             const response = await axios.post(apiadjacencyURL, apiRequest);
 
-            if (response.data && response.data.keyword) {
-                // 관련 키워드에 저장
-                topicAdjacentKeywords.set(topic, response.data.keyword);
-                console.log('Adjacent keywords for', topic, ':', response.data.keyword)
-                topicAdjacentSim.set(topic, (0.45 - response.data.similarity) / 0.0008);
+            if (response.data && Array.isArray(response.data.topics)) {
+                response.data.topics.forEach((topicObj) => {
+                    const keyword = topicObj.keyword;
+                    const similarity = topicObj.similarity;
+                    const adjustedSimilarity = (0.45 - similarity) / 0.0008;
 
+                    topicAdjacentKeywords.set(topic, keyword);
+                    console.log('Adjacent keywords for', topic, ':', keyword);
+                    topicAdjacentSim.set(topic, adjustedSimilarity);
+                });
             } else {
                 // 예기치 않은 응답 처리
                 console.warn('Unexpected response structure:', response.data);
                 topicAdjacentKeywords.set(topic, []);
             }
-        } catch (error) {
-            console.error('Error fetching adjacent keywords:', error);
-            topicAdjacentKeywords.set(topic, []);
         }
     }
 }
