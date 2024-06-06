@@ -149,14 +149,14 @@ wss.on('connection', (ws) => {
 
                                 const keywords = topicAdjacentKeywords.get(topicAdjacency);
                                 const sim = topicAdjacentSim.get(topicAdjacency);
-                                ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: keywords , similarity: sim, status: 1}));
+                                ws.send(JSON.stringify({ path: '/topic/adjacency', topic:req.topic, keywords: keywords , similarity: sim, status: 1}));
                             }
                             else{
-                                ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: [], similarity: [], status: 2}));
+                                ws.send(JSON.stringify({ path: '/topic/adjacency',topic:req.topic, keywords: [], similarity: [], status: 2}));
                             }
                         }
                         else{
-                            ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: [], similarity: [], status: 3}));
+                            ws.send(JSON.stringify({ path: '/topic/adjacency', topic:req.topic, keywords: [], similarity: [], status: 3}));
                         }
                     }
                     break;
