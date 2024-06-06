@@ -45,11 +45,11 @@ def send_to_sqlite(data):
 
 
 # FastText 모델 로드
-model = fasttext.load_model('files/cc.ko.300.bin')
-apikey = load_api_key('files/api_key.txt')
-#model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
+#model = fasttext.load_model('files/cc.ko.300.bin')
+#apikey = load_api_key('files/api_key.txt')
+model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
 print("model loaded")
-#apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
+apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
 print("apikey loaded")
 
 
@@ -249,49 +249,69 @@ def notBanned():
     send_to_sqlite(youtube_data)
     return
 
-
 @app.route('/adjacency', methods=['POST'])
 def adjacency():
+    selected_topics = []
     data = request.get_json()
     topic = data.get('topic', '')
 
-    # num_neighbors와 num_select는 쿼리 파라미터로부터 가져옴, 기본값은 30과 20
-    num_neighbors = 200  # initial number of neighbors to search
-    increment_neighbors = 100
-    num_select = 20
+    # 초기 및 스텝 설정
+    num_neighbors = 200  # 초기 검색할 이웃의 수
+    increment_neighbors = 150  # 이웃 수 증가 폭
+    max_neighbors = 1000  # 최대 이웃 수
+    num_select = 20  # 선택할 토픽의 수
 
-    topic_vector = model.get_sentence_vector(topic)
-
-    filtered_words = []
     while True:
+        # 모델에서 유사한 단어 검색
         similar_words = model.get_nearest_neighbors(topic, k=num_neighbors)
 
-        # 0.35와 0.45 사이의 단어 선택
-        filtered_words = [neighbor for neighbor in similar_words if 0.35 <= neighbor[0] <= 0.45]
 
-        # 만약 필터링된 단어가 있고 최소 유사도가 0.35 이상이면 반복문 종료
-        if filtered_words and filtered_words[0][0] >= 0.37:
+        # 유사도 0.37과 0.45 사이의 단어 필터링
+        filtered_words = [neighbor for neighbor in similar_words if 0.37 <= neighbor[0] <= 0.45]
+
+        # 필터링된 단어가 있고 최소 유사도가 0.37 이하면 반복문 종료
+        if filtered_words and min(filtered_words, key=lambda x: x[0])[0] <= 0.37:
+
+            # 유사도 범위에서 20개의 키워드 선택
+            min_similarity = 0.37
+            max_similarity = 0.45
+            interval = (max_similarity - min_similarity) / num_select
+
+            for i in range(num_select):
+                target_similarity = min_similarity + i * interval
+                closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
+                if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
+                    selected_topics.append(closest_word)
+                    print(f"Selected topic: {closest_word}")
+
             break
 
-        # 1000개 이상의 유사 단어가 검색되면 반복문 종료 -> 무한 반복 방지
-        if num_neighbors >= 1000:
+        # 이웃의 수가 최대치를 넘으면 종료
+        if num_neighbors >= max_neighbors:
+            print("Reached maximum number of neighbors, selecting closest topics")
+
+            # 최소 유사도에서 범위에 가장 가까운 20개의 키워드 선택
+            min_similarity = min(filtered_words, key=lambda x: x[0])[0]
+            interval = (0.45 - min_similarity) / num_select
+
+            for i in range(num_select):
+                target_similarity = min_similarity + i * interval
+                closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
+                if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
+                    selected_topics.append(closest_word)
+                    print(f"Selected topic: {closest_word}")
+
             break
 
-        # 찾고자 하는 유사 단어의 수를 늘림
+        # 검색할 유사 단어의 수 증가
         num_neighbors += increment_neighbors
-
-    # 0.005 단위로 가장 가까운 단어 선택
-    selected_topics = []
-    for target_similarity in [0.35 + i * 0.005 for i in range(20)]:
-        closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
-        if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
-            selected_topics.append(closest_word)
 
     response = {
         "path": '/topic/adjacency',
-        "topic": [word[1] for word in selected_topics]
+        "topics": [{"similarity": word[0], "keyword": word[1]} for word in selected_topics]
     }
 
+    print(f"Final selected topics: {response['topics']}")
     return jsonify(response)
 
 
@@ -321,5 +341,5 @@ def adjacencyTopic():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=9836)
-    #app.run(host='localhost', port=5000)
+    #app.run(host='0.0.0.0', port=9836)
+    app.run(host='localhost', port=5000)

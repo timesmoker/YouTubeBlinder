@@ -32,6 +32,7 @@ const apiadjacencyTopicURL = 'http://13.125.145.225:9836/adjacencyTopic';  // AP
 const apiNotBannedURL = 'http://13.125.145.225:9836/notBanned';  // API 서버 주소 => 차단안됨
 let topicsAll = new Map();
 let topicAdjacentKeywords = new Map();
+let topicAdjacentSim = new Map();
 
 async function addTopic(topicsAll, topic) {
     if (topicsAll.has(topic)) {
@@ -50,10 +51,11 @@ async function addTopic(topicsAll, topic) {
 
             const response = await axios.post(apiadjacencyURL, apiRequest);
 
-            if (response.data && response.data.topic) {
+            if (response.data && response.data.keyword) {
                 // 관련 키워드에 저장
-                topicAdjacentKeywords.set(topic, response.data.topic);
-                console.log('Adjacent keywords for', topic, ':', response.data.topic)
+                topicAdjacentKeywords.set(topic, response.data.keyword);
+                console.log('Adjacent keywords for', topic, ':', response.data.keyword)
+                topicAdjacentSim.set(topic, response.data.similarity);
             } else {
                 // 예기치 않은 응답 처리
                 console.warn('Unexpected response structure:', response.data);
@@ -72,7 +74,8 @@ function removeTopic(topicsAll, topic) {
         topicsAll.set(topic, currentCount - 1);
     } else {
         topicsAll.delete(topic);
-    topicAdjacentKeywords.delete(topic);
+        topicAdjacentKeywords.delete(topic);
+        topicAdjacentSim.delete(topic);
     }
 }
 
@@ -116,8 +119,9 @@ wss.on('connection', (ws) => {
 
                     if (topicAdjacentKeywords.has(topic)) {
                         // Send the cached data
-                        const cachedData = topicAdjacentKeywords.get(topic);
-                        ws.send(JSON.stringify({ path: '/topic/adjacency', topic: cachedData }));
+                        const keywords = topicAdjacentKeywords.get(topic);
+                        const sim = topicAdjacentSim.get(topic);
+                        ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: keywords , similarity: sim}));
                     }
                     break;
 
