@@ -194,7 +194,7 @@ wss.on('connection', (ws) => {
                         removeTopic(topicsAll, topic);
                     }
                     for (let i = 0; i < req.topics.length; i++) {
-                        userTopics.set(req.topics[i], (0.45-(req.threshold *0.0008)));
+                        userTopics.set(req.topics[i], (0.45-(req.threshold[i] *0.0008)));
                         topicWhiteList.set(req.topic,[])
                         addTopic(topicsAll, req.topics[i]);
 
