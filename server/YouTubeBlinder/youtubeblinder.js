@@ -215,6 +215,12 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
+                case '/topic/debug':
+                    console.log('All topics:', topicsAll);
+                    console.log('User topics:', userTopics);
+                    console.log('Topic white list:', topicWhiteList);
+                    break;
+
                 case '/video':
                     const title = req.title;
                     console.log('video_id:', req.video_id);
