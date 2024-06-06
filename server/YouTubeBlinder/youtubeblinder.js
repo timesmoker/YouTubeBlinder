@@ -105,6 +105,7 @@ wss.on('connection', (ws) => {
     let thisID = connectionId++;
     let blockType = true;
     let userTopics = new Map();
+    let topicWhiteList = new Map();
 
     ws.on('message', async (data) => {
         try {
@@ -136,13 +137,25 @@ wss.on('connection', (ws) => {
                     break;
 
                 case '/topic/adjacency':
-                    const topic = req.topic;
+                    
+                    let topicAdjacency = req.topic;
 
-                    if (topicAdjacentKeywords.has(topic)) {
+                    if (topicAdjacentKeywords.has(topicAdjacency)) {
                         // Send the cached data
-                        const keywords = topicAdjacentKeywords.get(topic);
-                        const sim = topicAdjacentSim.get(topic);
-                        ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: keywords , similarity: sim}));
+                        if(topicsAll.has(topicAdjacency)){
+                            if (topicAdjacentKeywords.has(topicAdjacency) && topicAdjacentSim.has(topicAdjacency)) {
+
+                                const keywords = topicAdjacentKeywords.get(topicAdjacency);
+                                const sim = topicAdjacentSim.get(topicAdjacency);
+                                ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: keywords , similarity: sim, status: 1}));
+                            }
+                            else{
+                                ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: [], similarity: [], status: 2}));
+                            }
+                        }
+                        else{
+                            ws.send(JSON.stringify({ path: '/topic/adjacency', keywords: [], similarity: [], status: 3}));
+                        }
                     }
                     break;
 
@@ -160,19 +173,30 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
+                case '/topic/whiteList':
+                    let topicToWhite = req.topic;   //화이트리스트 할 토픽
+                    if (!topicWhiteList.has(topicToWhite)) {
+                        for(let i = 0; i < req.whiteList.length; i++){
+                            topicWhiteList.get(topicToWhite).push(req.whiteList[i]);
+                        }
+                    }
+
                 case '/topic/all':
                     for (let topic of userTopics.keys()) {
                         removeTopic(topicsAll, topic);
                     }
                     for (let i = 0; i < req.topics.length; i++) {
                         userTopics.set(req.topics[i], (0.45-(req.threshold *0.0008)));
+                        topicWhiteList.set(req.topic,[])
                         addTopic(topicsAll, req.topics[i]);
+
                     }
                     break;
 
                 case '/topic/add':
                     if (!userTopics.has(req.topic)) {
                         userTopics.set(req.topic, (0.45-(req.threshold *0.0008)));
+                        topicWhiteList.set(req.topic,[])
                         addTopic(topicsAll, req.topic);
                     }
                     break;
@@ -180,6 +204,7 @@ wss.on('connection', (ws) => {
                 case '/topic/remove':
                     if (userTopics.has(req.topic)) {
                         userTopics.delete(req.topic);
+                        topicWhiteList.delete(req.topic);
                         removeTopic(topicsAll, req.topic);
                     }
                     break;
@@ -191,7 +216,11 @@ wss.on('connection', (ws) => {
                     const apiRequest = {
                         title: title,
                         video_id: req.video_id,
-                        topic: Array.from(userTopics.keys())
+                        topic: Array.from(userTopics.keys()),
+                        whiteList: Array.from(userTopics.keys()).reduce((acc, topic) => {
+                            acc[topic] = topicWhiteList.get(topic) || [];
+                            return acc;
+                        }, {})
                     };
 
                     if (apiRequest.topic.length === 0) {

@@ -8,6 +8,7 @@ import scipy.spatial as spatial
 import time
 import unicodedata
 import re
+import gzip
 
 from youtubeapi import load_api_key, get_video_information
 
@@ -37,9 +38,10 @@ def keep_korean(text):
 
 
 def send_to_sqlite(data):
+    compressed_data = gzip.compress(json.dumps(data).encode('utf-8'))
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((SQLITE_HOST, SQLITE_PORT))
-        s.sendall(json.dumps(data).encode('utf-8'))
+        s.sendall(compressed_data)
         response = s.recv(1024)
         print('Received from SQLite server:', response.decode('utf-8'))
 
@@ -60,53 +62,40 @@ print("nlp initialzied")
 
 @app.route('/simCalculate', methods=['POST'])
 def receive_data():
-    # JSON 형식의 데이터 수신
     data = request.get_json()
     print("Received data:", data)
 
-    # 클라이언트로부터 받은 title 처리
     title = data.get('title', '')
     title = unicodedata.normalize('NFC', title)
     title = keep_korean(title)
     topics = data.get('topic', [])
-
-    print("제목 가공 후:", title)
+    whiteList = data.get('whiteList', {})
 
     description = ''
 
-    # 비디오 아이디 있으면 확인
     if 'video_id' in data:
         video_id = data.get('video_id', '')
-        tags, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
+        tags, thumbnailurl, description, categoryID, channelID = get_video_information("apikey", video_id)
         print("tags:", tags)
         print("thumbnailurl:", thumbnailurl)
         print("description:", description)
-        print("categoryID:", categoryID)  # 이후에 이용예정 일단 받아오는것까지 확인
+        print("categoryID:", categoryID)
         print("channelID:", channelID)
 
-
-
-    # 형태소 분석 수행
     start_time = time.time()
-
-    title_keywords = nlp.analyze_text(title)  # title에서 키워드 추출
-    description_keywords = nlp.analyze_text(description)  # description에서 키워드 추출
-
-    # 시간 측정 종료
+    title_keywords = nlp.analyze_text(title)
+    description_keywords = nlp.analyze_text(description)
     end_time = time.time()
 
-    # 소요된 시간 계산
     elapsed_time = end_time - start_time
     print("형태소 분리에 걸린시간:", elapsed_time, "seconds")
     print("추출된 키워드:", title_keywords)
 
-    # 유사도 계산
     maxSimList = []
     avgSimList = []
 
     start_time = time.time()
 
-    # 모든 키워드와 모든 토픽 간의 유사도 계산
     for topic in topics:
         max_sim = 0
         total_sim = 0
@@ -115,6 +104,26 @@ def receive_data():
         topic_vector = model.get_sentence_vector(topic)
         keyword_count = 0
         description_keywords_count = 0
+
+        whitelist_keywords = whiteList.get(topic, [])
+
+        if any(keyword in whitelist_keywords for keyword in title_keywords):
+            print(f"Topic '{topic}' contains a whitelisted keyword in title. Setting similarity to 0.")
+            maxSimList.append(0)
+            avgSimList.append(0)
+            continue
+
+        if any(keyword in whitelist_keywords for keyword in description_keywords):
+            print(f"Topic '{topic}' contains a whitelisted keyword in description. Setting similarity to 0.")
+            maxSimList.append(0)
+            avgSimList.append(0)
+            continue
+
+        if any(keyword in whitelist_keywords for keyword in tags):
+            print(f"Topic '{topic}' contains a whitelisted keyword in tags. Setting similarity to 0.")
+            maxSimList.append(0)
+            avgSimList.append(0)
+            continue
 
         for keyword in title_keywords:
             keyword_vector = model.get_sentence_vector(keyword)
@@ -148,13 +157,8 @@ def receive_data():
         maxSimList.append(max_sim)
         avgSimList.append(avg_sim)
 
-
-
-
-
     end_time = time.time()
 
-    # Finding the topic with the highest max_sim
     max_sim_index = maxSimList.index(max(maxSimList))
     highest_maxSim_topic = topics[max_sim_index]
     highest_maxSim = maxSimList[max_sim_index]
@@ -162,11 +166,9 @@ def receive_data():
     if highest_maxSim < 0.5:
         highest_maxSim_topic = ""
 
-    # 소요된 시간 계산
     elapsed_time = end_time - start_time
     print("유사도 측정에 걸린시간:", elapsed_time, "seconds")
 
-    # 응답 메시지에 최대 유사도와 총 유사도 배열 추가
     response = {
         "maxSim": maxSimList,
         "avg_sim": avgSimList
@@ -180,12 +182,10 @@ def receive_data():
         'category': categoryID,
         'topic': highest_maxSim_topic,
         'tags': tags,
-        # 'thumbnail': thumbnailstring,
         'channel_id': channelID
     }
-    send_to_sqlite(youtube_data)
+    # send_to_sqlite(youtube_data)
 
-    # JSON 형태로 응답 반환
     return jsonify(response)
 
 
