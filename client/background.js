@@ -1,7 +1,6 @@
-const ip = "3.37.177.6.sslip.io";
-const port = "2018";
-const socket = new WebSocket(`wss://${ip}:${port}`);
+let serverOpen = false;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -91,35 +90,78 @@ socket.onopen = function(event) {
 	console.log('WebSocket is connected.');
 >>>>>>> 80ad9ef (client latest)
 };
+=======
+function connectToServer() {
+	const ip = "3.37.177.6.sslip.io";
+	const port = "2018";
+	const socket = new WebSocket(`wss://${ip}:${port}`);
+>>>>>>> f36770c (naive blind)
 
-socket.onmessage = function(event) {
-	// 메시지를 팝업 또는 다른 컴포넌트에 전달
-	chrome.runtime.sendMessage({type: "websocket_message", key: "receive", value: event.data}, function(response) {
-		console.log(`from Server: ${event.data}`);
-		if (chrome.runtime.lastError) {
-			console.error("Error sending message: ", chrome.runtime.lastError);
+	socket.onopen = function(event) {
+		console.log('WebSocket is connected.');
+		serverOpen = true;
+	};
+
+	socket.onmessage = function(event) {
+		// 메시지를 팝업 또는 다른 컴포넌트에 전달
+		const receive = JSON.parse(event.data);
+		const path = receive['path'];
+		console.log(`------------from Server--------------${event.data}`);
+		if (path == '/video') {
+			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				var activeTab = tabs[0];
+				json = JSON.stringify({title: receive['title'], banned: receive['banned']});
+				console.log(`${json}`);
+				chrome.tabs.sendMessage(activeTab.id, json, function(response) {
+					console.log("send tab")
+				});
+			});
+		} else {
+			chrome.runtime.sendMessage({type: receive['path'], value: event.data}, function(response) {
+				if (chrome.runtime.lastError) {
+					console.log(receive['path']);
+					console.error("Error sending message: ", chrome.runtime.lastError);
+				}
+				console.log(`receive ${receive['path']}`);
+				console.log(`receive response: ${response}`); // "success"
+			});
 		}
-		console.log(`receive response: ${response}`); // "success"
-	});
-};
+	};
 
-socket.onerror = function(event) {
-	console.error('WebSocket error observed:', event);
-};
+	socket.onerror = function(event) {
+		console.error('WebSocket error observed:', event);
+	};
 
-socket.onclose = function(event) {
-	console.log('WebSocket is closed now.');
-};
+	socket.onclose = function(event) {
+		console.log('WebSocket is closed now.');
+		serverOpen = false;
+	};
+
+	return (socket);
+}
+
+let socket = connectToServer();
 
 // 메시지 송신 함수
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message.type === "send_websocket") {
-		if (socket && socket.readyState === WebSocket.OPEN) {
-			console.log(`to Server: ${message.value}`);
-			socket.send(message.value);
+	if (message.type === "getStatus") {
+		sendResponse({status: serverOpen});
+	} else if (serverOpen) {
+		if (message.type === "send_websocket") {
+			if (socket && socket.readyState === WebSocket.OPEN) {
+				console.log(`to Server: ${message.value}`);
+				socket.send(message.value);
+			}
+			sendResponse({value: message.value});
 		}
-        sendResponse({value: message.value});
-    }
+		if (message.type === "updateContextMenu") {
+			if (socket && socket.readyState === WebSocket.OPEN) {
+				console.log(`to Server: ${message.value}`);
+				socket.send(message.value);
+			}
+			sendResponse({value: message.value});
+		}
+	}
 });
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -132,9 +174,15 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+	console.log(info);
 	if (info.menuItemId === "sampleMenu") {
-		// 예를 들어, 클릭된 페이지의 URL 정보를 사용
-		// console.log('Page URL:', info.pageUrl);
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			var activeTab = tabs[0];
+			json = JSON.stringify({title: "", link: info.linkUrl});
+			chrome.tabs.sendMessage(activeTab.id, json, function(response) {
+				console.log("send tab rightClick");
+			});
+		});
 	}
 });
 
