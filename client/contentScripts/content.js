@@ -124,24 +124,16 @@ window.addEventListener('load', () => {
 			// console.log(thumbnail);
 			// console.log(channel);
 			// console.log(i, "-------------------");
-			if (title == '') {
-				// invisible
-				// video.style.display='none';
-				// blur
-				vidArr[i].style.filter = "blur(5Px)";
-			}
 			// general video link
 			console.log(vidArr[i]);
-			link = getVideoLink(videos[i]);
-			id = link.split('=')[1];
+			id = vidArr[i].link.split('=')[1];
 			// thumbnail link
 			thumbnail = ("https://img.youtube.com/vi/"+id+"/0.jpg");
 			// console.log(thumbnail);
 			// video
-			json = JSON.stringify({ path: '/video', title: vidArr[i].title, URL: id });
+			json = JSON.stringify({ path: '/video', title: vidArr[i].title, video_id: id, whiteList: [] });
 			// console.log(json);
-			chrome.runtime.sendMessage({type: "send_websocket", key: "/video", value: json}, function(response) {
-				console.log(i);
+			chrome.runtime.sendMessage({type: "send_websocket", value: json}, function(response) {
 				if (chrome.runtime.lastError) {
 					console.error("Error sending message: ", chrome.runtime.lastError);
 				}
@@ -155,36 +147,77 @@ window.addEventListener('load', () => {
 			console.log(video);
 			console.log(i, "===================");
 		}
+		json = JSON.stringify({ path: '/topic/debug'});
+			// console.log(json);
+		chrome.runtime.sendMessage({type: "send_websocket", value: json}, function(response) {
+			if (chrome.runtime.lastError) {
+				console.error("Error sending message: ", chrome.runtime.lastError);
+			}
+			console.log(`video send response: ${response}`); // "success"
+		});
+
+		// document.addEventListener('contextmenu', event => {
+		// 	const clickedElement = event.target.parentNode;
+		// 	console.log(event);
+		// 	let elementText = clickedElement.href;
+		// 	const userInput = prompt("주제를 입력하세요", "주제");
+		// 	if (userInput) {
+		// 		for (var i = 0; i < vidArr.length; i++) {
+		// 			if (vidArr[i].link === elementText) {
+		// 				json = JSON.stringify({path: "/notBanned", topic: userInput, title: vidArr[i].title, video_id: vidArr[i].link.split("=")[1]})
+		// 				chrome.runtime.sendMessage({
+		// 					type: 'updateContextMenu',
+		// 					value: json
+		// 				}, function(response) {
+		// 					if (chrome.runtime.lastError) {
+		// 						console.error("Error sending message: ", chrome.runtime.lastError);
+		// 					}
+		// 					console.log(`updateContextMenu response: ${response}`); // "success"
+		// 				});
+		// 			}
+		// 		}
+		// 	}
+		// });
 	}
 
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		if (message.type === 'websocket_message') {
-			console.log(`receive socket receive: ${message.value}`);
-			resultJson = JSON.parse(message.value);
-			// word plus response
-			try {
-				const resultWordList = resultJson.word;
-				const resultThresList = resultJson.threshold;
-				for (var i = 0; i < topicList.length; i++){
-					console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+		console.log(`receive socket receive: ${message}`);
+		resultJson = JSON.parse(message);
+		// word plus response
+		// try {
+		// 	const resultWordList = resultJson.word;
+		// 	const resultThresList = resultJson.threshold;
+		// 	for (var i = 0; i < topicList.length; i++){
+		// 		console.log(`word: ${resultWordList[i]}///threshold: ${resultThresList[i]}`);
+		// 	}
+		// } catch (e) {
+		// 	console.log(e);
+		// }
+		// console.log(resultJson);
+
+		//blind videos
+		var title = resultJson['title'];
+		if (title === "") {
+			//notBanned
+			for (var i = 0; i < vidArr.length; i++) {
+				console.log(`${i}: ${vidArr[i].link}`);
+				if (vidArr[i].link === resultJson['link']) {
+					video[i].style.display = 'none';
 				}
-			} catch (e) {
-				console.log(e);
 			}
-			console.log(resultJson);
+		} else {
+			for (var i = 0; i < vidArr.length; i++) {
+				console.log(`${i}: ${vidArr[i].title}`);
+				if (vidArr[i].title === title) {
+					if (resultJson['banned']) {
+						videos[i].style.display='none';
+					}
+				}
+			}
 		}
-		sendResponse({value: message.value});
+		sendResponse({value: resultJson});
+		return true;
 	});
-	//blind videos
-	// var title = JSON.parse(event.data)["title"];
-	// if (title) {
-	// 	console.log(title);
-	// }
-	// for (var i = 0; i < videos.length; i++) {
-	// 	if (getVideoTitle(videos[i])== title) {
-	// 		videos[i].style.display='none';
-	// 	}
-	// }
 
 
 	// socket.onmessage = function(event) {
@@ -234,16 +267,6 @@ window.addEventListener('load', () => {
 	// };
 });
 
-document.addEventListener('contextmenu', event => {
-	const clickedElement = event.target.parentNode;
-	console.log(clickedElement);
-	let elementText = clickedElement.href;
-	chrome.runtime.sendMessage({
-		type: 'updateContextMenu',
-		text: elementText
-	});
-});
-
 function getVideoTitle(video) {
 	if (video) {
 		title = video.getElementsByTagName('h3')[0].outerText;
@@ -260,6 +283,7 @@ function getVideoLink(video) {
 class Video {
 	constructor(video) {
 		this.title = video.getElementsByTagName('h3')[0].outerText;
+		this.link = getVideoLink(video);
 		this.thumbnail = video.getElementsByTagName('ytd-thumbnail')[0];
 		this.thumblink = this.thumbnail.getElementsByTagName('a')[0].href;
 		this.channel = video.getElementsByTagName('ytd-video-meta-block')[0].parentNode.parentNode;
