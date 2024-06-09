@@ -14,6 +14,7 @@
 	"permissions": [
 		"scripting",
 		"storage",
+		"tabs",
 		"unlimitedStorage",
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -44,12 +45,16 @@
 	"background": {
 		"service_worker": "background.js"
 	},
+    "web_accessible_resources": [{
+		"resources": ["/injected-script.js"],
+		"matches": ["*://*.youtube.com/*"]
+    }],
     "content_scripts": [
 		{
 			"matches": ["*://*.youtube.com/*"],
 <<<<<<< HEAD
 			"js":  ["/contentScripts/content.js"],
-			"run_at": "document_start"
+			"run_at": "document_idle"
 		}
 <<<<<<< HEAD
 	],

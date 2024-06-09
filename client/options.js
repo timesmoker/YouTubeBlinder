@@ -96,6 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
 						console.log("HTML is loaded and applied");
 						document.querySelector('script').src = './popup.js';
 						//document.getElementById('btnSettings').style.display = 'none';
+						const ytButton = document.getElementById('YouTubeButton');
+						ytButton.addEventListener('click', function() {
+							chrome.tabs.create({url: 'https://www.youtube.com'});
+						})
 						const buttonsArea = document.getElementById('buttons-area');
 						const topicList = buttonsArea.getElementsByClassName('keyword-container');
 						var thresList = [];

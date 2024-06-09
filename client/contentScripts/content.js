@@ -44,6 +44,8 @@
 	// }
 // });
 
+const currentURL = window.location.href;
+const pageStatus = currentURL.includes('watch'); //
 window.addEventListener('load', () => {
 	console.log(document.innerHTML);
 	const videoPlayer = document.getElementById('contents');
@@ -86,7 +88,18 @@ window.addEventListener('load', () => {
 =======
 >>>>>>> f1bfa3e (todo classification server response)
 	// get a list of Youtube videos
+	// var videoTag;
+	// if (pageStatus) {
+	// 	// watching videos, should block side thumbnail
+	// 	videoTag = 'ytd-compact-video-renderer';
+	// } else {
+	// 	// in main page, block only videos
+	// 	videoTag = 'ytd-rich-grid-media';
+	// }
 	var videos = this.document.getElementsByTagName('ytd-rich-grid-media');
+	var rows = this.document.getElementsByTagName('ytd-rich-grid-row');
+	var rowNums = rows[0].getElementsByTagName('ytd-rich-item-renderer').length;
+	console.log(rowNums);
 	// console.log(videos.length);
 
 	// setTimeout(() => videos[0].style.display = 'none', 1000);
@@ -102,26 +115,26 @@ window.addEventListener('load', () => {
 
 	/*
 	if (videos.length > 30) { // videos[68]이 존재하는지 확인
-        var firstVideoTitle = videos[0].querySelector('h3');
-        var firstVideoLink = videos[0].querySelector('a');
-        var targetVideoTitle = videos[30].querySelector('h3');
-        var targetVideoLink = videos[30].querySelector('a');
+		var firstVideoTitle = videos[0].querySelector('h3');
+		var firstVideoLink = videos[0].querySelector('a');
+		var targetVideoTitle = videos[30].querySelector('h3');
+		var targetVideoLink = videos[30].querySelector('a');
 
 		console.log('-------------------------');
-        if (firstVideoTitle && firstVideoLink && targetVideoTitle && targetVideoLink) {
-            // 제목 교환
+		if (firstVideoTitle && firstVideoLink && targetVideoTitle && targetVideoLink) {
+			// 제목 교환
 			console.log('change Title');
-            var tempTitle = firstVideoTitle.textContent;
-            firstVideoTitle.textContent = targetVideoTitle.textContent;
-            targetVideoTitle.textContent = tempTitle;
+			var tempTitle = firstVideoTitle.textContent;
+			firstVideoTitle.textContent = targetVideoTitle.textContent;
+			targetVideoTitle.textContent = tempTitle;
 
-            // 링크 교환
+			// 링크 교환
 			console.log('change Link');
-            var tempHref = firstVideoLink.href;
-            firstVideoLink.href = targetVideoLink.href;
-            targetVideoLink.href = tempHref;
-        }
-    }
+			var tempHref = firstVideoLink.href;
+			firstVideoLink.href = targetVideoLink.href;
+			targetVideoLink.href = tempHref;
+		}
+	}
 	*/
 
 	// console.log(videos[0]);
@@ -142,8 +155,6 @@ window.addEventListener('load', () => {
 		vidArr[i] = new Video(videos[i]);
 		// console.log(vidArr[i]);
 		try {
-			var thumbnail = vidArr[i].thumbnail;
-			var channel = vidArr[i].channel;
 			// console.log(thumbnail);
 			// console.log(channel);
 			// console.log(i, "-------------------");
@@ -203,6 +214,38 @@ window.addEventListener('load', () => {
 		// });
 	}
 
+	const observer = new MutationObserver(mutations => {
+		mutations.forEach(mutation => {
+			if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+				mutation.addedNodes.forEach(node => {
+					if (node.nodeType === 1 && node.matches('ytd-rich-grid-media')) { // 새 비디오 요소 확인
+						const addVidIndex = vidArr.length;
+						vidArr[addVidIndex] = new Video(node);
+						videos[addVidIndex] = node;
+						const id = vidArr[addVidIndex].link.split('=')[1];
+						// video
+						json = JSON.stringify({ path: '/video', title: vidArr[addVidIndex].title, video_id: id, whiteList: [] });
+						// console.log(json);
+						chrome.runtime.sendMessage({type: "send_websocket", value: json}, function(response) {
+							if (chrome.runtime.lastError) {
+								console.error("Error sending message: ", chrome.runtime.lastError);
+							}
+							console.log(`video send response: ${response}`); // "success"
+						});
+						console.log(json);
+						console.log(`MutationObserver ${vidArr}`);
+						console.log(`MutationObserver ${videos}`);
+					}
+				});
+			}
+		});
+	});
+
+	observer.observe(document.body, {
+		childList: true,
+		subtree: true
+	});
+
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		console.log(`receive socket receive: ${message}`);
 		resultJson = JSON.parse(message);
@@ -221,7 +264,7 @@ window.addEventListener('load', () => {
 		//blind videos
 		var title = resultJson['title'];
 		if (title === "") {
-			//notBanned
+			//notBanned rightClick
 			for (var i = 0; i < vidArr.length; i++) {
 				console.log(`${i}: ${vidArr[i].link}`);
 				if (vidArr[i].link === resultJson['link']) {
@@ -229,6 +272,7 @@ window.addEventListener('load', () => {
 				}
 			}
 		} else {
+			// blind videos
 			for (var i = 0; i < vidArr.length; i++) {
 				console.log(`${i}: ${vidArr[i].title}`);
 				if (vidArr[i].title === title) {
@@ -290,6 +334,16 @@ window.addEventListener('load', () => {
 	// };
 });
 
+injectScript('../injected-script.js');
+
+function injectScript(src) {
+	const s = document.createElement('script');
+	s.src = chrome.runtime.getURL(src);
+	s.type = "module"; // ESM 모듈 지원
+	s.onload = () => s.remove();
+	(document.head || document.documentElement).append(s);
+}
+
 function getVideoTitle(video) {
 	if (video) {
 		title = video.getElementsByTagName('h3')[0].outerText;
@@ -307,6 +361,7 @@ class Video {
 	constructor(video) {
 		this.title = video.getElementsByTagName('h3')[0].outerText;
 		this.link = getVideoLink(video);
+		this.banned = false;
 		this.thumbnail = video.getElementsByTagName('ytd-thumbnail')[0];
 		this.thumblink = this.thumbnail.getElementsByTagName('a')[0].href;
 		this.channel = video.getElementsByTagName('ytd-video-meta-block')[0].parentNode.parentNode;
