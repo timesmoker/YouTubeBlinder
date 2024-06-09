@@ -72,6 +72,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 	}
 });
 
+
 chrome.runtime.onInstalled.addListener(() => {
 	chrome.tabs.create({url: 'options.html'});
 	chrome.contextMenus.create({

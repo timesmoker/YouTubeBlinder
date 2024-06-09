@@ -10,6 +10,7 @@
 	"permissions": [
 		"scripting",
 		"storage",
+		"tabs",
 		"unlimitedStorage",
 		"contextMenus",
 		"declarativeNetRequest",
@@ -23,11 +24,15 @@
 	"background": {
 		"service_worker": "background.js"
 	},
+    "web_accessible_resources": [{
+		"resources": ["/injected-script.js"],
+		"matches": ["*://*.youtube.com/*"]
+    }],
     "content_scripts": [
 		{
 			"matches": ["*://*.youtube.com/*"],
 			"js":  ["/contentScripts/content.js"],
-			"run_at": "document_start"
+			"run_at": "document_idle"
 		}
 	]
 }
