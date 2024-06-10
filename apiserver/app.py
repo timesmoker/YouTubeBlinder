@@ -50,23 +50,38 @@ def send_to_sqlite(data):
         print('Received from SQLite server:', response.decode('utf-8'))
 
 
-def calculate_similarity(topic, keywords, topic_vector, max_sim, max_sim_keywords, total_sim, keyword_count):
+def calculate_similarity(topic, keywords, topic_vector, max_sim, max_sim_keywords, total_sim, keyword_count, model):
     if not keywords:
         return max_sim, max_sim_keywords, total_sim, keyword_count
+
     for keyword in keywords:
         if keyword == topic:
             similarity = 1.0
-        print("keyword:", keyword)
-        keyword_vector = model.get_sentence_vector(keyword)
-        similarity = 1 - spatial.distance.cosine(keyword_vector, topic_vector)
-        if similarity == 1.0:
-            print("null vector")
+        else:
+            print("keyword:", keyword)
+            keyword_vector = model.get_sentence_vector(keyword)
+
+            # 유효한 벡터인지 검사
+            if np.any(np.isnan(keyword_vector)) or np.any(np.isnan(topic_vector)):
+                print("NaN detected in vectors")
+                continue
+            if np.linalg.norm(keyword_vector) == 0 or np.linalg.norm(topic_vector) == 0:
+                print("Null vector detected")
+                continue
+
+            similarity = 1 - spatial.distance.cosine(keyword_vector, topic_vector)
+
+        if similarity == 1.0 and keyword != topic:
+            print("null vector similarity, if you see this something is doomed")
             continue
-        if max(similarity, max_sim) == similarity:
+
+        if similarity > max_sim:
             max_sim_keywords = keyword
-            max_sim = max(max_sim, similarity)
-            total_sim += similarity
-            keyword_count += 1
+            max_sim = similarity
+
+        total_sim += similarity
+        keyword_count += 1
+
     return max_sim, max_sim_keywords, total_sim, keyword_count
 
 
@@ -166,6 +181,9 @@ def receive_data():
     for tag in tags_origin:
         tags.extend(tag.split())
 
+    # 중복 제거
+    tags = list(set(tags))
+
     start_time = time.time()
     title_keywords = nlp.analyze_text(title)
     description_keywords = nlp.analyze_text(description)
@@ -217,17 +235,17 @@ def receive_data():
         max_sim[0], max_sim_keywords[0], total_sim, keyword_count = calculate_similarity(topic,category, topic_vector,
                                                                                          max_sim[0],
                                                                                          max_sim_keywords[0], total_sim,
-                                                                                         keyword_count)
+                                                                                         keyword_count, model)
         max_sim[1], max_sim_keywords[1], total_sim, keyword_count = calculate_similarity(topic,title_keywords, topic_vector,
                                                                                          max_sim[1],
                                                                                          max_sim_keywords[1], total_sim,
-                                                                                         keyword_count)
+                                                                                         keyword_count, model)
         max_sim[2], max_sim_keywords[2], total_sim, keyword_count = calculate_similarity(topic,tags, topic_vector, max_sim[2],
                                                                                          max_sim_keywords[2], total_sim,
-                                                                                         keyword_count)
+                                                                                         keyword_count, model)
         max_sim[3], max_sim_keywords[3], description_avg_sim, description_keywords_count = calculate_similarity(topic,
             description_keywords, topic_vector, max_sim[3], max_sim_keywords[3], description_avg_sim,
-            description_keywords_count)
+            description_keywords_count, model)
 
         avg_sim = total_sim / keyword_count if keyword_count > 0 else 0
 
@@ -302,20 +320,34 @@ def notBanned():
     description = ''
     categoryID = ''
     channelID = ''
-
+    tags_origin = []
     category = []
 
-    print("제목 가공 후:", title)
 
     # 비디오 아이디 있으면 확인
     if 'video_id' in data:
         video_id = data.get('video_id', '')
-        tags, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
-        print("tags:", tags)
+        tags_origin, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
+        print("tags:", tags_origin)
         print("thumbnailurl:", thumbnailurl)
         print("description:", description)
-        print("categoryID:", categoryID)  # 이후에 이용예정 일단 받아오는것까지 확인
+        print("categoryID:", categoryID)
         print("channelID:", channelID)
+
+        # 소개 한글만 남김
+        description = keep_korean(description)
+
+        # 태그 한글만 남김
+        tags = [keep_korean(tag) for tag in tags]
+
+        # 태그 공백 기준으로 분리
+        for tag in tags_origin:
+            tags.extend(tag.split())
+
+        # 중복 제거
+        tags = list(set(tags))
+
+
 
     youtube_data = {
         'table': "today",

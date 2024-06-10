@@ -108,7 +108,8 @@ wss.on('connection', (ws) => {
     let blockType = true;
     let userTopics = new Map();
     let topicWhiteList = new Map();
-
+    let htmlContent = '';
+    let listContent = '';
     ws.on('message', async (data) => {
         try {
             if (data === undefined || data === null || data === '') {
@@ -129,6 +130,15 @@ wss.on('connection', (ws) => {
             }
 
             switch (req.path) {
+                case '/save/html':
+                    htmlContent = req.data;
+                case '/load/html':
+                    ws.send(JSON.stringify({ path: req.path, data: htmlContent }));
+                case '/save/list':
+                    listContent = req.data;
+                case '/load/list':
+                    ws.send(JSON.stringify({ path: req.path, data: listContent }));
+
                 case '/notBanned':
                     const notBannedRequest = {
                         topic: req.topic,
