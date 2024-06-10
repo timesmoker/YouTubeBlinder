@@ -293,7 +293,6 @@ def notBanned():
 
     # 클라이언트로부터 받은 title 처리
     title = data.get('title', '')
-    title = unicodedata.normalize('NFC', title)
     title = keep_korean(title)
     topic = data.get('topic', '')
 
@@ -318,26 +317,10 @@ def notBanned():
         print("categoryID:", categoryID)  # 이후에 이용예정 일단 받아오는것까지 확인
         print("channelID:", channelID)
 
-    category = categoryCheck(categoryID)
-
-    # 형태소 분석 수행
-    start_time = time.time()
-
-    title_keywords = nlp.analyze_text(title)  # title에서 키워드 추출
-    description_keywords = nlp.analyze_text(description)  # description에서 키워드 추출
-
-    # 시간 측정 종료
-    end_time = time.time()
-
-    # 소요된 시간 계산
-    elapsed_time = end_time - start_time
-    print("형태소 분리에 걸린시간:", elapsed_time, "seconds")
-    print("추출된 키워드:", title_keywords)
-
     youtube_data = {
         'table': "today",
-        'title': title_keywords,
-        'description': description_keywords,
+        'title': title,
+        'description': description,
         'video_id': video_id,
         'category': categoryID,
         'topic': topic,
