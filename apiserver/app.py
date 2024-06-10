@@ -118,7 +118,6 @@ def receive_data():
     description = ''
     categoryID = ''
     channelID = ''
-
     category = []
 
 
@@ -134,6 +133,9 @@ def receive_data():
     category = categoryCheck(categoryID)
     print("카테고리 : " + str(category))
 
+    description = unicodedata.normalize('NFC', description)
+    description = keep_korean(description)
+
     start_time = time.time()
     title_keywords = nlp.analyze_text(title)
     description_keywords = nlp.analyze_text(description)
@@ -145,6 +147,7 @@ def receive_data():
     maxSimList = []
     avgSimList = []
 
+    start_time = time.time()
     def calculate_similarity(keywords, topic_vector, max_sim, max_sim_keywords, total_sim, keyword_count):
         if not keywords:
             return max_sim, max_sim_keywords, total_sim, keyword_count
