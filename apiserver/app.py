@@ -32,10 +32,13 @@ def initialize_nlp():
 
 def keep_korean(text):
     # 한글만 남김
+    text = unicodedata.normalize('NFC', text)
     korean_pattern = re.compile('[^가-힣\s]+')
-
     # 한글 범위 외의 모든 문자를 공백으로 대체하여 제거
-    return korean_pattern.sub('', text)
+    text = korean_pattern.sub('', text)
+    # 중복 공백을 제거
+    text = re.sub(r'\s+', ' ', text)
+    return text
 
 
 def send_to_sqlite(data):
@@ -45,6 +48,26 @@ def send_to_sqlite(data):
         s.sendall(compressed_data)
         response = s.recv(1024)
         print('Received from SQLite server:', response.decode('utf-8'))
+
+
+def calculate_similarity(topic, keywords, topic_vector, max_sim, max_sim_keywords, total_sim, keyword_count):
+    if not keywords:
+        return max_sim, max_sim_keywords, total_sim, keyword_count
+    for keyword in keywords:
+        if keyword == topic:
+            similarity = 1.0
+        print("keyword:", keyword)
+        keyword_vector = model.get_sentence_vector(keyword)
+        similarity = 1 - spatial.distance.cosine(keyword_vector, topic_vector)
+        if similarity == 1.0:
+            print("null vector")
+            continue
+        if max(similarity, max_sim) == similarity:
+            max_sim_keywords = keyword
+            max_sim = max(max_sim, similarity)
+            total_sim += similarity
+            keyword_count += 1
+    return max_sim, max_sim_keywords, total_sim, keyword_count
 
 
 def categoryCheck(category_number_str):
@@ -107,12 +130,12 @@ def receive_data():
     print("Received data:", data)
 
     title = data.get('title', '')
-    title = unicodedata.normalize('NFC', title)
     title = keep_korean(title)
     topics = data.get('topic', [])
     whiteList = data.get('whiteList', {})
 
     video_id = ''
+    tags_origin = []
     tags = []
     thumbnailurl = ''
     description = ''
@@ -123,8 +146,8 @@ def receive_data():
 
     if 'video_id' in data:
         video_id = data.get('video_id', '')
-        tags, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
-        print("tags:", tags)
+        tags_origin, thumbnailurl, description, categoryID, channelID = get_video_information(apikey, video_id)
+        print("tags:", tags_origin)
         print("thumbnailurl:", thumbnailurl)
         print("description:", description)
         print("categoryID:", categoryID)
@@ -133,8 +156,15 @@ def receive_data():
     category = categoryCheck(categoryID)
     print("카테고리 : " + str(category))
 
-    description = unicodedata.normalize('NFC', description)
+    # 소개 한글만 남김
     description = keep_korean(description)
+
+    # 태그 한글만 남김
+    tags = [keep_korean(tag) for tag in tags]
+
+    # 태그 공백 기준으로 분리
+    for tag in tags_origin:
+        tags.extend(tag.split())
 
     start_time = time.time()
     title_keywords = nlp.analyze_text(title)
@@ -143,25 +173,16 @@ def receive_data():
 
     elapsed_time = end_time - start_time
     print("형태소 분리에 걸린시간:", elapsed_time, "seconds")
-    print("추출된 키워드:", title_keywords)
+
+    print("제목 가공 후:", title)
+    print("소개 가공 후:", description)
+    print("추출된 제목 키워드:", title_keywords)
+    print("추출된 소개 키워드:", description_keywords)
+
     maxSimList = []
     avgSimList = []
 
     start_time = time.time()
-    def calculate_similarity(keywords, topic_vector, max_sim, max_sim_keywords, total_sim, keyword_count):
-        if not keywords:
-            return max_sim, max_sim_keywords, total_sim, keyword_count
-        for keyword in keywords:
-            keyword_vector = model.get_sentence_vector(keyword)
-            if np.all(keyword_vector == 0):
-                continue
-            similarity = 1 - spatial.distance.cosine(keyword_vector, topic_vector)
-            if max(similarity, max_sim) == similarity:
-                max_sim_keywords = keyword
-            max_sim = max(max_sim, similarity)
-            total_sim += similarity
-            keyword_count += 1
-        return max_sim, max_sim_keywords, total_sim, keyword_count
 
     for topic in topics:
         max_sim = [0, 0, 0, 0]
@@ -193,18 +214,18 @@ def receive_data():
             avgSimList.append(0)
             continue
 
-        max_sim[0], max_sim_keywords[0], total_sim, keyword_count = calculate_similarity(category, topic_vector,
+        max_sim[0], max_sim_keywords[0], total_sim, keyword_count = calculate_similarity(topic,category, topic_vector,
                                                                                          max_sim[0],
                                                                                          max_sim_keywords[0], total_sim,
                                                                                          keyword_count)
-        max_sim[1], max_sim_keywords[1], total_sim, keyword_count = calculate_similarity(title_keywords, topic_vector,
+        max_sim[1], max_sim_keywords[1], total_sim, keyword_count = calculate_similarity(topic,title_keywords, topic_vector,
                                                                                          max_sim[1],
                                                                                          max_sim_keywords[1], total_sim,
                                                                                          keyword_count)
-        max_sim[2], max_sim_keywords[2], total_sim, keyword_count = calculate_similarity(tags, topic_vector, max_sim[2],
+        max_sim[2], max_sim_keywords[2], total_sim, keyword_count = calculate_similarity(topic,tags, topic_vector, max_sim[2],
                                                                                          max_sim_keywords[2], total_sim,
                                                                                          keyword_count)
-        max_sim[3], max_sim_keywords[3], description_avg_sim, description_keywords_count = calculate_similarity(
+        max_sim[3], max_sim_keywords[3], description_avg_sim, description_keywords_count = calculate_similarity(topic,
             description_keywords, topic_vector, max_sim[3], max_sim_keywords[3], description_avg_sim,
             description_keywords_count)
 

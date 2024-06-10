@@ -15,7 +15,7 @@ def get_video_information(api_key, video_id):
     )
 
     response = request.execute()
-
+    print("geting video information")
     # 첫 번째 항목 가져오기
     item = response['items'][0] if 'items' in response and len(response['items']) > 0 else {}
 
