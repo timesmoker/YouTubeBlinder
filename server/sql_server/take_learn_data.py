@@ -75,23 +75,36 @@ elif table == 'today_request' or table == 'learn_request' or table == 'not_banne
             tags_lines = []
 
             for item in json_data:
-                category = item.get("category", "").strip()
-                title = item.get("title", "").strip()
-                description = item.get("description", "").strip()
-                tags = item.get("tags", "").strip("[]").replace("'", "").replace(",", "").strip()
+                if "category" in item:
+                    if "title" in item:
+                        categories.append(item["category"])
+                        titles.append(item["title"])
+                        title_lines.append(f'__label__{item["category"]} {item["title"]}')
+                    if "description" in item:
+                        # description에서 URL 제거
+                        description = item["description"]
+                        description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
+                        descriptions.append(description)
+                        description_lines.append(f'__label__{item["category"]} {description}')
+                    if "tags" in item:
+                        # tags 문자열에서 대괄호 제거
+                        tags = item["tags"].strip("[]").replace("'", "").replace(",", "")
+                        tags_list.append(tags)
+                        tags_lines.append(f'__label__{item["category"]} {tags}')
 
-                # description에서 URL, 줄바꿈, '#으로 시작하는 단어 제거
-                description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
-                description = description.replace('\n', ' ').replace('\r', '')
-                description = re.sub(r'\s+', ' ', description).strip()
-                description = re.sub(r'#\S+', '', description)
+            # 데이터프레임 생성
+            title_df = pd.DataFrame({'category': categories, 'title': titles})
+            description_df = pd.DataFrame({'category': categories, 'description': descriptions})
+            tags_df = pd.DataFrame({'category': categories, 'tags': tags_list})
 
-                if category and title:
-                    title_lines.append(f'__label__{category} {title}')
-                if category and description:
-                    description_lines.append(f'__label__{category} {description}')
-                if category and tags:
-                    tags_lines.append(f'__label__{category} {tags}')
+            # CSV 파일로 저장
+            title_df.to_csv('output_category_title.csv', index=False, encoding='utf-8-sig')
+            description_df.to_csv('output_category_description.csv', index=False, encoding='utf-8-sig')
+            tags_df.to_csv('output_category_tags.csv', index=False, encoding='utf-8-sig')
+
+            print("category와 title이 output_category_title.csv 파일에 저장되었습니다.")
+            print("category와 description이 output_category_description.csv 파일에 저장되었습니다.")
+            print("category와 tags가 output_category_tags.csv 파일에 저장되었습니다.")
 
             # title 텍스트 파일로 저장
             with open('output_category_title.txt', 'w', encoding='utf-8') as f:
@@ -120,26 +133,36 @@ elif table == 'today_request' or table == 'learn_request' or table == 'not_banne
             processed_lines = []
 
             for item in json_data:
-                category = item.get("category", "").strip()
-                title = item.get("title", "").strip()
-                description = item.get("description", "").strip()
-                tags = item.get("tags", "").strip("[]").replace("'", "").replace(",", "").strip()
+                if "category" in item:
+                    categories.append(item["category"])
+                    if "title" in item:
+                        titles.append(item["title"])
+                    else:
+                        titles.append("")
+                    if "description" in item:
+                        # description에서 URL 제거
+                        description = item["description"]
+                        description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
+                        descriptions.append(description)
+                    else:
+                        descriptions.append("")
+                    if "tags" in item:
+                        tags = item["tags"].strip("[]").replace("'", "").replace(",", "")
+                        tags_list.append(tags)
+                    else:
+                        tags_list.append("")
 
-                # description에서 URL, 줄바꿈, '#으로 시작하는 단어 제거
-                description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
-                description = description.replace('\n', ' ').replace('\r', '')
-                description = re.sub(r'\s+', ' ', description).strip()
-                description = re.sub(r'#\S+', '', description)
+            # 데이터프레임 생성
+            df = pd.DataFrame({
+                'category': categories,
+                'title': titles,
+                'description': descriptions,
+                'tags': tags_list
+            })
 
-                if category and (title or description or tags):
-                    line = f"category: {category}"
-                    if title:
-                        line += f" title: {title}"
-                    if tags:
-                        line += f" tags: {tags}"
-                    if description:
-                        line += f" description: {description}"
-                    processed_lines.append(line)
+            # CSV 파일로 저장
+            df.to_csv('kobert_dataset.csv', index=False, encoding='utf-8-sig')
+            print("KoBERT 학습을 위한 데이터가 kobert_dataset.csv 파일에 저장되었습니다.")
 
             # 텍스트 파일로 저장
             with open('kobert_dataset.txt', 'w', encoding='utf-8') as f:
