@@ -132,13 +132,16 @@ wss.on('connection', (ws) => {
             switch (req.path) {
                 case '/save/html':
                     htmlContent = req.data;
+                    break;
                 case '/load/html':
                     ws.send(JSON.stringify({ path: req.path, data: htmlContent }));
+                    break;
                 case '/save/list':
                     listContent = req.data;
+                    break;
                 case '/load/list':
                     ws.send(JSON.stringify({ path: req.path, data: listContent }));
-
+                    break;
                 case '/notBanned':
                     const notBannedRequest = {
                         topic: req.topic,

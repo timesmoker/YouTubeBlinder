@@ -58,9 +58,7 @@ def calculate_similarity(topic, keywords, topic_vector, max_sim, max_sim_keyword
         if keyword == topic:
             similarity = 1.0
         else:
-            print("keyword:", keyword)
             keyword_vector = model.get_sentence_vector(keyword)
-
             # 유효한 벡터인지 검사
             if np.any(np.isnan(keyword_vector)) or np.any(np.isnan(topic_vector)):
                 print("NaN detected in vectors")
