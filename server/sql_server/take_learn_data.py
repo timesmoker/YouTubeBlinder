@@ -7,11 +7,11 @@ import pandas as pd
 host = "13.125.145.225"
 port = 8870
 
-table = "today_request"
-video_id = "qgmy-s6F2nA"
+table = "learn_request"
+video_id = ""
 title = ''
 description = ''
-category = "Entertainment"
+category = ""
 topic = ''
 tags = ''
 thumbnail = ""
@@ -21,8 +21,7 @@ column = "all"
 # all, title, description 3개 중에 선택
 # output.txt에는 데이터만, original_output.txt에는 json 데이터 그대로 저장
 
-
-#fasttext 또는 kobert 선택
+# fasttext 또는 kobert 선택
 learn_style = "fasttext"
 
 request_data = {
@@ -88,9 +87,11 @@ elif table == 'today_request' or table == 'learn_request' or table == 'not_banne
                         titles.append(item["title"])
                         title_lines.append(f'__label__{item["category"]} {item["title"]}')
                     if "description" in item:
-                        # description에서 URL 제거
+                        # description에서 URL 제거 및 줄바꿈 제거
                         description = item["description"]
                         description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
+                        description = description.replace('\n', ' ').replace('\r', '')  # 줄바꿈 제거
+                        description = re.sub(r'\s+', ' ', description).strip()  # 여러 공백을 하나의 공백으로
                         descriptions.append(description)
                         description_lines.append(f'__label__{item["category"]} {description}')
                     if "tags" in item:
@@ -155,9 +156,11 @@ elif table == 'today_request' or table == 'learn_request' or table == 'not_banne
                     else:
                         titles.append("")
                     if "description" in item:
-                        # description에서 URL 제거
+                        # description에서 URL 제거 및 줄바꿈 제거
                         description = item["description"]
                         description = re.sub(r'http[s]?://\S+|www\.\S+', '', description)
+                        description = description.replace('\n', ' ').replace('\r', '')  # 줄바꿈 제거
+                        description = re.sub(r'\s+', ' ', description).strip()  # 여러 공백을 하나의 공백으로
                         descriptions.append(description)
                     else:
                         descriptions.append("")
