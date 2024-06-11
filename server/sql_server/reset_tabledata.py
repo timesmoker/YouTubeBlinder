@@ -24,60 +24,46 @@ def move_all_data():
                 print("No data found in today_data")
                 return
 
-            # 중복 ID 및 제목 필터링
-            existing_ids_query = """
-                SELECT id, title, tags, category 
-                FROM learn_data 
-                WHERE id IN (%s)
-            """ % ','.join(['%s'] * len(rows))
-            existing_ids = [row[0] for row in rows]
-            cursor.execute(existing_ids_query, existing_ids)
-            existing_records = cursor.fetchall()
-            
-            existing_records_dict = {(row[0], row[1]): (row[2], row[3]) for row in existing_records}
-            
-            rows_to_insert = []
-            rows_to_update = []
-
             for row in rows:
-                key = (row[0], row[1])
-                if key in existing_records_dict:
-                    # 기존 레코드와 비교하여 태그나 카테고리가 없는 경우 업데이트 리스트에 추가
-                    if not existing_records_dict[key][0] or not existing_records_dict[key][1]:
-                        rows_to_update.append(row)
-                else:
-                    rows_to_insert.append(row)
-            
-            if rows_to_insert:
-                # 데이터 삽입
-                insert_query = """
-                    INSERT INTO learn_data (id, title, description, tags, channel_id, category, topic, thumbnail)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """
-                cursor.executemany(insert_query, rows_to_insert)
-
-            if rows_to_update:
-                # 데이터 업데이트
-                update_query = """
-                    UPDATE learn_data
-                    SET description = %s, tags = %s, channel_id = %s, category = %s, topic = %s, thumbnail = %s
+                id, title, description, tags, channel_id, category, topic, thumbnail = row
+                
+                # 기존 데이터 확인
+                existing_record_query = """
+                    SELECT description, tags, channel_id, category, topic, thumbnail 
+                    FROM learn_data 
                     WHERE id = %s AND title = %s
                 """
-                update_data = [(row[2], row[3], row[4], row[5], row[6], row[7], row[0], row[1]) for row in rows_to_update]
-                cursor.executemany(update_query, update_data)
-
-            if rows_to_insert or rows_to_update:
+                cursor.execute(existing_record_query, (id, title))
+                existing_record = cursor.fetchone()
+                
+                if existing_record:
+                    # 기존 데이터와 비교하여 동일한 경우 넘어가기
+                    if (description, tags, channel_id, category, topic, thumbnail) == existing_record:
+                        print(f"Record with id {id} already exists with the same data. Skipping insertion.")
+                    else:
+                        # 태그나 카테고리가 없는 경우 업데이트
+                        update_query = """
+                            UPDATE learn_data
+                            SET description = %s, tags = %s, channel_id = %s, category = %s, topic = %s, thumbnail = %s
+                            WHERE id = %s AND title = %s
+                        """
+                        cursor.execute(update_query, (description, tags, channel_id, category, topic, thumbnail, id, title))
+                        print(f"Record with id {id} updated.")
+                else:
+                    # 새로운 데이터 삽입
+                    insert_query = """
+                        INSERT INTO learn_data (id, title, description, tags, channel_id, category, topic, thumbnail)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    cursor.execute(insert_query, (id, title, description, tags, channel_id, category, topic, thumbnail))
+                    print(f"Record with id {id} inserted.")
+                
                 # 원본 데이터 삭제
-                ids_to_delete = [row[0] for row in rows_to_insert + rows_to_update]
-                delete_query = "DELETE FROM today_data WHERE id IN (%s)" % ','.join(['%s'] * len(ids_to_delete))
-                cursor.execute(delete_query, ids_to_delete)
-                
-                # 커밋
-                conn.commit()
-                
-                print(f"{len(rows_to_insert)} records inserted and {len(rows_to_update)} records updated successfully")
-            else:
-                print("No new records to move or update.")
+                delete_query = "DELETE FROM today_data WHERE id = %s"
+                cursor.execute(delete_query, (id,))
+            
+            conn.commit()
+            print("All data moved successfully.")
             
             # 모든 데이터가 삭제되었는지 확인
             cursor.execute("SELECT COUNT(*) FROM today_data")
