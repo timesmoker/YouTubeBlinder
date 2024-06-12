@@ -16,6 +16,21 @@ const certificate = fs.readFileSync('../Key/fullchain.pem', 'utf8');
 
 const credentials = { key: privateKey, cert: certificate };
 
+const listInit = "            <div class=\"key-container\">\n" +
+    "                <button class=\"container-minus\">🗑</button>\n" +
+    "                <button class=\"oval-button red-oval topic-button\">음악</button>\n" +
+    "            </div>\n" +
+    "            <div class=\"slider-container\">\n" +
+    "                <input type=\"range\" class=\"slider\" min=\"1\" max=\"100\" value=\"50\">\n" +
+    "                <span class=\"sliderValue\">50</span>\n" +
+    "                <div class=\"text\" style=\"position: relative;\">\n" +
+    "                    <p style=\"position: absolute; left: 0;\">약하게</p>\n" +
+    "                    <p style=\"position: absolute; right: 0;\">강하게</p>\n" +
+    "                </div>\n" +
+    "                <div class=\"button-container\">\n" +
+    "                    <button class=\"oval-button word-plus\">연관단어</button>\n" +
+    "                </div>\n" +
+    "            </div>"
 // HTTPS 서버 생성 및 WebSocket 서버와 연동
 const httpsServer= https.createServer(credentials, app);
 const wss= new WebSocketServer({ server: httpsServer });
@@ -109,7 +124,7 @@ wss.on('connection', (ws) => {
     let userTopics = new Map();
     let topicWhiteList = new Map();
     let htmlContent = '';
-    let listContent = '';
+    let listContent = listInit;
     ws.on('message', async (data) => {
         try {
             if (data === undefined || data === null || data === '') {
