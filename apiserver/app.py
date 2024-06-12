@@ -359,7 +359,11 @@ def notBanned():
         'channel_id': channelID
     }
     send_to_sqlite(youtube_data)
-    return
+    # Return a response to avoid the error
+    response = {
+        "message": "Data processed successfully"
+    }
+    return jsonify(response)
 
 @app.route('/adjacency', methods=['POST'])
 def adjacency():
