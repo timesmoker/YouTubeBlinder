@@ -90,10 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		chrome.runtime.sendMessage({type: "getStatus"}, function(response) {
 			if (response.status) {
 				console.log("server is connected");
-				chrome.storage.local.get("htmlContent", function(data) {
-					if (data.htmlContent) {
-						document.body.innerHTML = data.htmlContent;
-						console.log("HTML is loaded and applied");
+					chrome.storage.local.get("htmlContent", function(data) {
+						if (data.htmlContent) {
+							document.body.innerHTML = data.htmlContent;
+							console.log("HTML is loaded and applied");
+						}
 						document.querySelector('script').src = './popup.js';
 						//document.getElementById('btnSettings').style.display = 'none';
 						const ytButton = document.getElementById('YouTubeButton');
@@ -108,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
 							thresList[i] = topicList[i].getElementsByClassName('slider')[0].value;
 							wordList[i] = topicList[i].getElementsByClassName('topic-button')[0].textContent;
 						}
+						console.log(`init ${wordList}`);
+						chrome.storage.local.set({"wordList": wordList}, function() {});
 						if (topicList.length > 0) {
 							// topic/all
 							json = JSON.stringify({ path: '/topic/all', topics: wordList, threshold: thresList });
@@ -118,12 +121,32 @@ document.addEventListener('DOMContentLoaded', () => {
 								console.log(`topicAll send response: ${response}`); // "success"
 							});
 						}
+						document.getElementsByClassName('get-adjacent')[0].addEventListener('click', function(event) {
+							console.log(wordList);
+							for (var i = 0; i < wordList.length; i++) {
+								json = JSON.stringify({path: "/topic/adjacency", topic: wordList[i]});
+								console.log(`ADJACENCY: ${wordList[i]}`);
+								chrome.runtime.sendMessage({type: "send_websocket", value: json}, function(response) {
+									if (chrome.runtime.lastError) {
+										console.error("Error sending message: ", chrome.runtime.lastError);
+									}
+									console.log(`topicAdjacency send response: ${response}`); // "success"
+								});
+							}
+						});
+						json = JSON.stringify({path: "/load/list"});
+						chrome.runtime.sendMessage({type: "send_websocket", "key": "send", value: json}, function(response) {
+							if (chrome.runtime.lastError) {
+								console.error("Error sending message: ", chrome.runtime.lastError);
+							}
+							console.log(`/load/list send response: ${response}`); // "success"
+						});
 						chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 							console.log(message.type);
 							if (message.type === "/topic/adjacency") {
 								const receive = JSON.parse(message.value);
 								if (receive['status'] == 1) {
-									alert('로딩 성공!');
+									alert(`${receive['topic']} 로딩 성공!`);
 									var i = 0;
 									while (true) {
 										console.log(wordList[i]);
@@ -147,13 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
 									}
 									sendResponse({status: true});
 								} else if (receive['status'] == 2) {
-									alert('연관 주제 생성중입니다. 잠시 후 다시 시도해주세요');
+									alert(`${receive['topic']}의 연관 주제 생성중입니다. 잠시 후 다시 시도해주세요`);
 									sendResponse({status: true});
 								}
 							}
 							if (message.type === "/topic/add") {
 								console.log("=============================");
 								sendResponse({status: true});
+							}
+							if (message.type === "/load/list") {
+								const receive = JSON.parse(message.value);
+								chrome.storage.local.set({"loadList": receive['data']}, function() {
+
+								});
 							}
 							return true
 						});
@@ -164,21 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 									event.target.classList.toggle('active');
 									var isActive = this.classList.contains('active');
 									console.log('토글 상태:', isActive ? '활성화' : '비활성화');
-									chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
-										console.log(document.body.innerHTML);
-									});
-								}
-								if (event.target.classList.contains('get-adjacent')) {
-									const topic = event.target.parentNode.getElementsByClassName('topic-button')[0].textContent;
-
-									json = JSON.stringify({path: "/topic/adjacency", topic: topic});
-									console.log(`ADJACENCY: ${topic}`);
-									chrome.runtime.sendMessage({type: "send_websocket", value: json}, function(response) {
-										if (chrome.runtime.lastError) {
-											console.error("Error sending message: ", chrome.runtime.lastError);
-										}
-										console.log(`topicAdjacency send response: ${response}`); // "success"
-									});
+									chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {});
 								}
 
 								// topic/remove
@@ -195,6 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
 									});
 
 									event.target.parentNode.parentNode.remove();
+									const idx = wordList.indexOf(topic);
+									if (idx > -1) wordList.splice(idx, 1)
+									console.log(wordList);
+									chrome.storage.local.set({"wordList": wordList});
 									chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 										// console.log(document.body.innerHTML);
 									});
@@ -210,12 +229,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 								for (var i = 0; i <buttonList.length; i++) {
 									if (i / buttonList.length < event.target.value / event.target.max) {
-										buttonList[i].classList.remove('active');
+										buttonList[i].classList.add('active');
 									}
 								}
 								for (var i = 0; i <buttonList.length; i++) {
 									if (i / buttonList.length > event.target.value / event.target.max) {
-										buttonList[i].classList.add('active');
+										buttonList[i].classList.remove('active');
 									}
 								}
 
@@ -238,46 +257,61 @@ document.addEventListener('DOMContentLoaded', () => {
 							if (overfifteen) {
 								return;
 							}
-							var textFieldValue = document.getElementById('textField').value;
+							const textFieldValue = document.getElementById('textField').value;
 							// 기존의 버튼 컨테이너를 선택
 							const originalContainers = document.querySelectorAll('.keyword-container');
 							const originalContainer = originalContainers[originalContainers.length - 1];
 
+
 							// 컨테이너를 깊은 복사하여 모든 요소를 포함하여 복제
-							const newContainer = originalContainer.cloneNode(true);
-							chrome.storage.local.set({"listPlus": newContainer}, function() {
-								console.log(newContainer);
-							});
+							// const tempContainer = originalContainer.cloneNode(true);
+							// chrome.storage.local.set({"listPlus": tempContainer.innerHTML}, function() {
 
-							originalNum = splitKeywordListNum(originalContainer.className);
+							// });
+
+							var newContainer = document.createElement('div');
+							originalNum = 0;
+							console.log(originalContainer);
+							if (originalContainer !== undefined) {
+								originalNum = splitKeywordListNum(originalContainer.className);
+							}
 							newContainer.className = `keyword-container con${parseInt(originalNum)+1}`;
-							if (originalNum >= 14) {
-								overfifteen = true;
-							}
-							const sliderContainer = newContainer.getElementsByClassName('slider-container');
-							const buttonContainer = newContainer.getElementsByClassName('button-container');
-
-							const tempButton = sliderContainer[0].querySelectorAll('button');
-							tempButton[0].className = "container-minus";
-							tempButton[0].textContent = "-";
-							tempButton[1].className = "oval-button red-oval topic-button";
-							tempButton[1].textContent = textFieldValue;
-
-							sliderContainer[0].getElementsByClassName('slider')[0].setAttribute('value', 100);
-							sliderContainer[0].getElementsByClassName('sliderValue')[0].textContent = 100;
-
-							// 복제된 컨테이너에서 모든 버튼 요소 찾기
-							const buttons = buttonContainer[0].querySelectorAll('button');
-
-							if (buttons.length > 1) {
-								for (let i = 1; i < buttons.length; i++) {
-									buttons[i].remove();
+							// chrome.storage.local.get("listPlus", function(data) {
+							// 	newContainer.innerHTML = data.listPlus;
+							// 	console.log(data.listPlus);
+							// 	newContainer.getElementsByClassName('topic-button')[0].textContent = textFieldValue;
+							// 	json = JSON.stringify({ path: '/save/list', data: newContainer.innerHTML});
+							// 	chrome.runtime.sendMessage({type: "send_websocket", "key": "send", value: json}, function(response) {
+							// 		if (chrome.runtime.lastError) {
+							// 			console.error("Error sending message: ", chrome.runtime.lastError);
+							// 		}
+							// 		console.log(`/save/list send response: ${response}`); // "success"
+							// 	});
+							// });
+							chrome.storage.local.get("loadList", function(data) {
+								newContainer.innerHTML = data.loadList.trim();
+								console.log(newContainer);
+								newContainer.getElementsByClassName('topic-button')[0].textContent = textFieldValue;
+								if (originalNum >= 14) {
+									overfifteen = true;
 								}
-							}
+								// chrome.storage.local.set({"listPlus": newContainer.innerHTML}, function() {
+								// 	console.log(newContainer.innerHTML);
+								// });
 
-							// 문서에 새로운 컨테이너 추가
-							originalContainer.insertAdjacentElement('afterend', newContainer);
-
+								// 문서에 새로운 컨테이너 추가
+								if (originalContainer !== undefined) {
+									console.log('1');
+									originalContainer.insertAdjacentElement('afterend', newContainer);
+								} else {
+									console.log('2');
+									buttonsArea.appendChild(newContainer);
+								}
+							});
+							console.log(document.body.innerHTML);
+							wordList[wordList.length] = textFieldValue;
+							console.log(wordList);
+							chrome.storage.local.set({"wordList": wordList}, function() {});
 							// topic/add
 							json = JSON.stringify({ path: '/topic/add', topic: textFieldValue, threshold: 100 });
 							chrome.runtime.sendMessage({type: "send_websocket", key: "send", value: json}, function(response) {
@@ -287,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 								console.log(`topicAdd send response: ${response}`); // "success"
 							});
 
+<<<<<<< HEAD
 >>>>>>> f36770c (naive blind)
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {
 <<<<<<< HEAD
@@ -493,6 +528,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					console.log(document.body.innerHTML);
 =======
 >>>>>>> f36770c (naive blind)
+=======
+							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {});
+
+						}
+				// 	}
+>>>>>>> a6672ef (demo try)
 				});
 				//////////////
 				// chrome.storage.local.get('keywordList', function(result) {

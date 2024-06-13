@@ -1,22 +1,30 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8afe3c1 (default UI)
+=======
+<!-- popup.html -->
+>>>>>>> a6672ef (demo try)
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Form</title>
+    <title>Extension Options</title>
     <style>
         /* 텍스트 필드 스타일링 */
         #textField {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             width: 600px;   /* 너비 설정 */
+=======
+            width: 80%;   /* 너비 설정 */
+>>>>>>> a6672ef (demo try)
             height: 20px;   /* 높이 설정 */
             padding: 5px;   /* 내부 여백 추가 */
             font-size: 16px; /* 폰트 크기 */
+            background-color: #CBCBCB;
         }
         .form {
             display: flex;      /* Flexbox 레이아웃 적용 */
@@ -29,9 +37,8 @@
         .form input {
             flex-grow: 1;       /* 입력 필드가 남은 공간을 모두 차지하도록 설정 */
         }
-        /* 슬라이더 스타일링 */
-        .slider {
-            width: 600px;   /* 너비 설정 */
+        .slider-container {
+            position: relative;
         }
         .button-container {
             flex-wrap: nowrap; /* 버튼들이 다음 줄로 넘어가지 않고 한 줄에 표시 */
@@ -39,6 +46,11 @@
             width: 100%; /* 버튼 영역의 너비를 최대로 설정 */
             flex-shrink: 0; /* 버튼 컨테이너의 크기가 축소되지 않도록 설정 */
             display: flex;  /* Flexbox를 사용하여 버튼을 가로로 배치 */
+            position: absolute;
+            top: 50px;
+        }
+        .keyword-container { /* keyword-container */
+            display: flex;
         }
         .oval-button {
             border: none;  /* 테두리 제거 */
@@ -56,12 +68,38 @@
             justify-content: center; /* 가로 중앙 정렬 */
             display: flex; /* 버튼 내의 텍스트를 정렬하기 위해 flexbox 사용 */
             text-align: center; /* 텍스트 가로 정렬 */
+            color: #262626;
+            background-color: #CBCBCB;
         }
         .red-oval {
+            background-color: #ED4A55;
+            color: white;
             /* background-color: #FF0000;  버튼의 배경색 */
         }
         .oval-button:hover {
             /* background-color: #45a049;  호버 시 배경색 변경 */
+        }
+        .key-container {
+            border-right: solid 2px black;
+            display: grid;
+            grid-template-columns: 1fr 3fr 1fr;
+            grid-template-rows: 1fr 4fr;
+            grid-template-areas:
+                "one two three"
+                "four five six";
+            width: 15vw;
+            height: 100px;
+        }
+        .container-minus {
+            grid-area: three;
+            width: min-content;
+            height: min-content;
+        }
+        .topic-button {
+            grid-area: five;
+        }
+        #cloneWhiteButton {
+            background-color:  #88B1E2;
         }
         .toggle-button {
             padding: 10px 20px;
@@ -69,13 +107,14 @@
             text-align: center;
             cursor: pointer;
             outline: none;
-            color: #F1F1f1;
-            background-color: #212121;
+            color: #262626;
+            background-color: #CBCBCB;
             border: none;
             border-radius: 5px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
         }
         .toggle-button.active {
+<<<<<<< HEAD
 <<<<<<< HEAD
             background-color: white; /* 활성화 상태 색상 변경 */
             color: black;
@@ -159,10 +198,81 @@
             background-color: #F1F1f1; /* 활성화 상태 색상 변경 */
             color: #212121;
 >>>>>>> 80ad9ef (client latest)
+=======
+            background-color: #ED4A55;
+            color: white;
+        }
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            width: 75vw;
+            height: 10px;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider:before {
+            background-color: #cbcbcb;
+            transition: .4s;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: red;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: red;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider-switch {
+            background-color: #2196F3;
+        }
+        input:checked + .slider-switch:before {
+            transform: translateX(26px);
+        }
+        .slider-switch.round {
+            border-radius: 34px;
+        }
+        .slider-switch.round:before {
+            border-radius: 50%;
+>>>>>>> a6672ef (demo try)
         }
     </style>
 </head>
 <body>
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -194,18 +304,21 @@
             <div class="button-container">
                 <button class="oval-button word-plus">+</button>
             </div>
+=======
+    <h1>차단하시겠습니까?</h1>
+    <hr>
+    <div class="slider-container">
+        <h3>제목: </h3>
+        <div class="button-container">
+            <button class="oval-button word-plus">주제</button>
+>>>>>>> a6672ef (demo try)
         </div>
-        <div class="keyword-container con2">
-            <hr>
-            <div class="slider-container">
-                <button class="container-minus">-</button>
-                <button class="oval-button red-oval topic-button">음악</button>
-                <input type="range" class="slider" min="1" max="100" value="50">
-                <span class="sliderValue">50</span>
-            </div>
-            <div class="button-container">
-                <button class="oval-button word-plus">+</button>
-            </div>
+    </div>
+    <hr>
+    <div class="slider-container">
+        <div class="button-container">
+            <button class="oval-button" id="cancel">취소</button>
+            <button class="oval-button red-oval" id="block">차단</button>
         </div>
     </div>
     <script src="./popup.js"></script>
