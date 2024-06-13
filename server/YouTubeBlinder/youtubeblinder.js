@@ -279,17 +279,19 @@ wss.on('connection', (ws) => {
                         const avgSim = response.data.avg_sim;
 
                         let banned = false;
+                        let bannedTopics = [];
 
                         Array.from(userTopics.keys()).forEach((topic, index) => {
                             const threshold = userTopics.get(topic);
                             if (blindSim(maxSim[index], avgSim[index], threshold, blockType)) {
                                 banned = true;
+                                bannedTopics.push(topic);
                             }
                         });
 
                         if (banned) {
                             console.log('Title:', title, 'banned');
-                            ws.send(JSON.stringify({ path: req.path, title: title, banned: true }));
+                            ws.send(JSON.stringify({ path: req.path, title: title, banned: true , bannedTopics: bannedTopics}));
                         } else {
                             console.log('Title:', title, 'not banned');
                             ws.send(JSON.stringify({ path: req.path, title: title, banned: false }));

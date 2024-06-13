@@ -30,6 +30,7 @@ def initialize_nlp():
             nlp.initialize_koalanlp()
             initialized = True
 
+
 def keep_korean(text):
     # 한글만 남김
     text = unicodedata.normalize('NFC', text)
@@ -117,7 +118,7 @@ def categoryCheck(category_number_str):
         "42": ["단편"],
         "43": ["프로그램"],
         "44": ["예고편"],
-        "":[""]
+        "": [""]
     }
 
     return category_dict.get(category_number_str, ["Unknown Category"])
@@ -126,11 +127,10 @@ def categoryCheck(category_number_str):
 # FastText 모델 로드
 model = fasttext.load_model('files/cc.ko.300.bin')
 apikey = load_api_key('files/api_key.txt')
-#model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
+# model = fasttext.load_model('C:\\workspace\\files\\cc.ko.300.bin')
 print("model loaded")
-#apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
+# apikey = load_api_key('C:\\workspace\\keys\\youtubeapi.txt')
 print("apikey loaded")
-
 
 print("server is now running")
 initialize_nlp()
@@ -155,7 +155,6 @@ def receive_data():
     categoryID = ''
     channelID = ''
     category = []
-
 
     if 'video_id' in data:
         video_id = data.get('video_id', '')
@@ -230,20 +229,29 @@ def receive_data():
             avgSimList.append(0)
             continue
 
-        max_sim[0], max_sim_keywords[0], total_sim, keyword_count = calculate_similarity(topic,category, topic_vector,
+        max_sim[0], max_sim_keywords[0], total_sim, keyword_count = calculate_similarity(topic, category, topic_vector,
                                                                                          max_sim[0],
                                                                                          max_sim_keywords[0], total_sim,
                                                                                          keyword_count, model)
-        max_sim[1], max_sim_keywords[1], total_sim, keyword_count = calculate_similarity(topic,title_keywords, topic_vector,
+        max_sim[1], max_sim_keywords[1], total_sim, keyword_count = calculate_similarity(topic, title_keywords,
+                                                                                         topic_vector,
                                                                                          max_sim[1],
                                                                                          max_sim_keywords[1], total_sim,
                                                                                          keyword_count, model)
-        max_sim[2], max_sim_keywords[2], total_sim, keyword_count = calculate_similarity(topic,tags, topic_vector, max_sim[2],
+        max_sim[2], max_sim_keywords[2], total_sim, keyword_count = calculate_similarity(topic, tags, topic_vector,
+                                                                                         max_sim[2],
                                                                                          max_sim_keywords[2], total_sim,
                                                                                          keyword_count, model)
         max_sim[3], max_sim_keywords[3], description_avg_sim, description_keywords_count = calculate_similarity(topic,
-            description_keywords, topic_vector, max_sim[3], max_sim_keywords[3], description_avg_sim,
-            description_keywords_count, model)
+                                                                                                                description_keywords,
+                                                                                                                topic_vector,
+                                                                                                                max_sim[
+                                                                                                                    3],
+                                                                                                                max_sim_keywords[
+                                                                                                                    3],
+                                                                                                                description_avg_sim,
+                                                                                                                description_keywords_count,
+                                                                                                                model)
 
         avg_sim = total_sim / keyword_count if keyword_count > 0 else 0
 
@@ -267,11 +275,10 @@ def receive_data():
 
     elapsed_time = end_time - start_time
     print("유사도 측정에 걸린시간:", elapsed_time, "seconds")
-    print("카테고리 키워드 :",max_sim_keywords[0],"카테고리 유사도:", max_sim[0])
-    print("제목 키워드 :",max_sim_keywords[1],"제목 유사도:", max_sim[1])
-    print("태그 키워드 :",max_sim_keywords[2],"태그 유사도:", max_sim[2])
-    print("소개 키워드 :",max_sim_keywords[3],"소개 유사도:", max_sim[3])
-
+    print("카테고리 키워드 :", max_sim_keywords[0], "카테고리 유사도:", max_sim[0])
+    print("제목 키워드 :", max_sim_keywords[1], "제목 유사도:", max_sim[1])
+    print("태그 키워드 :", max_sim_keywords[2], "태그 유사도:", max_sim[2])
+    print("소개 키워드 :", max_sim_keywords[3], "소개 유사도:", max_sim[3])
 
     response = {
         "maxSim": maxSimList,
@@ -302,7 +309,6 @@ def shutdown():
 
 @app.route('/notBanned', methods=['POST'])
 def notBanned():
-
     # JSON 형식의 데이터 수신
     data = request.get_json()
     print("Received data:", data)
@@ -312,7 +318,6 @@ def notBanned():
     title = keep_korean(title)
     topic = data.get('topic', '')
 
-
     tags = []
     thumbnailurl = ''
     description = ''
@@ -320,7 +325,6 @@ def notBanned():
     channelID = ''
     tags_origin = []
     category = []
-
 
     # 비디오 아이디 있으면 확인
     if 'video_id' in data:
@@ -345,8 +349,6 @@ def notBanned():
         # 중복 제거
         tags = list(set(tags))
 
-
-
     youtube_data = {
         'table': "today",
         'title': title,
@@ -365,6 +367,7 @@ def notBanned():
     }
     return jsonify(response)
 
+
 @app.route('/adjacency', methods=['POST'])
 def adjacency():
     selected_topics = []
@@ -381,47 +384,43 @@ def adjacency():
         # 모델에서 유사한 단어 검색
         similar_words = model.get_nearest_neighbors(topic, k=num_neighbors)
 
-
         # 유사도 0.37과 0.45 사이의 단어 필터링
         filtered_words = [neighbor for neighbor in similar_words if 0.37 <= neighbor[0] <= 0.45]
 
         # 필터링된 단어가 있고 최소 유사도가 0.37 이하면 반복문 종료
-        if filtered_words and min(filtered_words, key=lambda x: x[0])[0] <= 0.37:
-
-            # 유사도 범위에서 20개의 키워드 선택
-            min_similarity = min(filtered_words, key=lambda x: x[0])[0]
-            max_similarity = max(filtered_words, key=lambda x: x[0])[0]
-            interval = (max_similarity - min_similarity) / num_select
-
-            for i in range(num_select):
-                target_similarity = min_similarity + i * interval
-                closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
-                if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
-                    selected_topics.append(closest_word)
-                    print(f"Selected topic: {closest_word}")
-
-            break
-
-        # 이웃의 수가 최대치를 넘으면 종료
-        if num_neighbors >= max_neighbors:
-            print("Reached maximum number of neighbors, selecting closest topics")
-
-            # 유사도 범위에서 20개의 키워드 선택
-            min_similarity = min(filtered_words, key=lambda x: x[0])[0]
-            max_similarity = max(filtered_words, key=lambda x: x[0])[0]
-            interval = (max_similarity - min_similarity) / num_select
-
-            for i in range(num_select):
-                target_similarity = min_similarity + i * interval
-                closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
-                if closest_word and closest_word[1] not in [word[1] for word in selected_topics]:
-                    selected_topics.append(closest_word)
-                    print(f"Selected topic: {closest_word}")
-
+        if filtered_words and min(filtered_words, key=lambda x: x[0])[0] <= 0.37 or num_neighbors >= max_neighbors:
             break
 
         # 검색할 유사 단어의 수 증가
         num_neighbors += increment_neighbors
+
+    # 유사도 범위에서 20개의 키워드 선택
+    min_similarity = min(filtered_words, key=lambda x: x[0])[0]
+    max_similarity = max(filtered_words, key=lambda x: x[0])[0]
+    interval = (max_similarity - min_similarity) / num_select
+
+    for i in range(num_select):
+        target_similarity = min_similarity + i * interval
+        closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
+
+        while closest_word:
+
+            korean_text = keep_korean(closest_word[1])
+            analyzed_text = nlp.analyze_text_Noun(korean_text)
+
+            if analyzed_text and analyzed_text[0] == '' or not analyzed_text:
+                filtered_words.remove(closest_word)
+                closest_word = min(filtered_words, key=lambda x: abs(x[0] - target_similarity), default=None)
+                analyzed_text = []
+
+            else:
+                break
+
+        if analyzed_text and analyzed_text[0] != '' and analyzed_text[0] not in selected_topics :
+            closest_word = (closest_word[0], analyzed_text[0] if analyzed_text else '')
+            selected_topics.append(closest_word)
+            print(f"Selected topic: " + closest_word[1])
+
 
     response = {
         "path": '/topic/adjacency',
@@ -432,7 +431,7 @@ def adjacency():
     return jsonify(response)
 
 
-@app.route('/adjacencyTopic',methods=['POST'])
+@app.route('/adjacencyTopic', methods=['POST'])
 def adjacencyTopic():
     data = request.get_json()
     topic_sent = data.get('topic', '')
@@ -459,5 +458,4 @@ def adjacencyTopic():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=9836)
-    #app.run(host='localhost', port=5000)
-
+    # app.run(host='localhost', port=5000)

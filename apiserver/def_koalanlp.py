@@ -17,22 +17,39 @@ def create_tagger():
     if tagger is None:
         tagger = Tagger(API.OKT)
 
+
 def analyze_text(text):
     if tagger is None:
         create_tagger()
 
-    exclude_tags = {'JX', 'SF','SS'}
+    include_tags = {'Noun', 'Verb', 'Adjective', 'NNG', 'NNP', 'VV', 'VA'}
     result_list = []
 
     tagged_paragraph = tagger(text)
     for sentence in tagged_paragraph:
         for word in sentence:
             for morph in word:
-                if str(morph.getTag()) not in exclude_tags:
+                if str(morph.getTag())  in include_tags:
                     result_list.append(f"{morph.getSurface()}")
 
     return result_list
 
+
+def analyze_text_Noun(text):
+    if tagger is None:
+        create_tagger()
+
+    include_tags = {'Noun', 'NNG', 'NNP'}
+    result_list = []
+
+    tagged_paragraph = tagger(text)
+    for sentence in tagged_paragraph:
+        for word in sentence:
+            for morph in word:
+                if str(morph.getTag())  in include_tags:
+                    result_list.append(f"{morph.getSurface()}")
+
+    return result_list
 
 # KoalaNLP 사용 종료
 def close_koalanlp():
