@@ -3,6 +3,7 @@
 	"description": "Youtube Blinder",
 	"version": "1.0",
 	"manifest_version": 3,
+<<<<<<< HEAD
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": true
@@ -14,12 +15,15 @@
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback"
 	],
+=======
+>>>>>>> 144f325 (get title and link)
     "action": {
         "service_worker": "background.js",
         "default_popup": "popup/popup.html",
         "default_title": "Youtube Blinder",
         "default_icon": "icon.png"
     },
+<<<<<<< HEAD
 	"background": {
 		"script": [ "background.js" ]
 	},
@@ -35,5 +39,13 @@
 			"resources": ["ytblock.html"],
 			"matches": ["<all_urls>"]
 		}
+=======
+    "content_scripts": [
+		{
+			"matches": ["*://www.youtube.com/*"],
+			"js":  ["/contentScripts/content.js"],
+			"run_at": "document_start"
+		}
+>>>>>>> 144f325 (get title and link)
 	]
 }

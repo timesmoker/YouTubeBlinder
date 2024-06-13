@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', () => {
 	chrome.storage.local.get("htmlContent", function(data) {
 		if (data.htmlContent) {
@@ -163,3 +164,19 @@ function splitKeywordListNum(str) {
 	const numKeywordList = matches ? matches[0] : null;
 	return (numKeywordList);
 }
+=======
+// document.addEventListener('DOMContentLoaded', function() {
+//   chrome.storage.local.get(['videos'], function(result) {
+//     if (result.videos) {
+//       result.videos.forEach(video => {
+//         const content = `<div>
+//           <img src="${video.thumbnail}" alt="${video.title}">
+//           <p>${video.title}</p>
+//           <a href="${video.link}" target="_blank">Watch</a>
+//         </div>`;
+//         document.body.innerHTML += content;
+//       });
+//     }
+//   });
+// });
+>>>>>>> 144f325 (get title and link)
