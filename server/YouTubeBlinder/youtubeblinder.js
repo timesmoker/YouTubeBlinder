@@ -83,6 +83,7 @@ async function addTopic(topicsAll, topic) {
                     similarities.push(adjustedSimilarity);
                 });
 
+
                 // 해당 주제에 대해 키워드 리스트와 유사도 리스트를 저장
                 topicAdjacentKeywords.set(topic, keywords);
                 topicAdjacentSim.set(topic, similarities);
