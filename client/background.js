@@ -18,7 +18,11 @@ function connectToServer() {
 		if (path == '/video') {
 			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 				var activeTab = tabs[0];
-				json = JSON.stringify({title: receive['title'], banned: receive['banned']});
+				if (receive['banned']) {
+					json = JSON.stringify({title: receive['title'], banned: receive['banned'], bannedTopics: receive['bannedTopics']});
+				} else {
+					json = JSON.stringify({title: receive['title'], banned: receive['banned']});
+				}
 				console.log(`${json}`);
 				chrome.tabs.sendMessage(activeTab.id, json, function(response) {
 					console.log("send tab")

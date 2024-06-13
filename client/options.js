@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {});
 
 						}
-				// 	}
+				// // 	}
 				});
 				//////////////
 				// chrome.storage.local.get('keywordList', function(result) {
