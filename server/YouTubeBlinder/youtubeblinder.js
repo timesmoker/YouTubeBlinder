@@ -291,7 +291,7 @@ wss.on('connection', (ws) => {
 
                         if (banned) {
                             console.log('Title:', title, 'banned');
-                            print("banned topics: ",bannedTopics);
+                            console.log("banned topics: ",bannedTopics);
                             ws.send(JSON.stringify({ path: req.path, title: title, banned: true , bannedTopics: bannedTopics}));
                         } else {
                             console.log('Title:', title, 'not banned');
