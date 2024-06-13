@@ -44,6 +44,19 @@
 	// }
 // });
 
+document.getElementById('search-icon-legacy').addEventListener('click', function() {
+	// const search = document.getElementById('search-input');
+	const search = document.getElementById('container');
+	const searchText = search.innerHTML;
+	console.log(searchText);
+	chrome.tabs.create({url: `https://www.youtube.com/results?search_query=${searchText}`});
+});
+
+var wordList;
+chrome.storage.local.get("wordList", function(data) {
+	wordList = data.wordList;
+});
+console.log('Connection opened');
 const currentURL = window.location.href;
 const pageStatus = currentURL.includes('watch'); //
 var timeout = 0;
@@ -208,7 +221,6 @@ window.addEventListener('pageshow', () => {
 		// console.log(temp.getElementsByTagName('a')[0].href);
 
 
-		console.log('Connection opened');
 
 		console.log(videos.length);
 		var vidArr = [];
@@ -238,6 +250,12 @@ window.addEventListener('pageshow', () => {
 					console.log(`video send response: ${response}`); // "success"
 				});
 				console.log(json);
+				for (var j = 0; j < wordList.length; j++) {
+					if (vidArr[i].title.includes(wordList[j])) {
+						videos[i].style.display = 'none';
+						vidArr[i].banned = true;
+					}
+				}
 			} catch (error) {
 				console.log(i, "===================");
 				console.log(error);
@@ -331,8 +349,8 @@ window.addEventListener('pageshow', () => {
 			if (title === "") {
 				//notBanned rightClick
 				for (var i = 0; i < vidArr.length; i++) {
+					console.log(`${i}: ${vidArr[i].link}`);
 					if (vidArr[i].link === resultJson['link']) {
-						console.log(`${i}: ${vidArr[i].title}`);
 						videos[i].style.display = 'none';
 						vidArr[i].banned = true;
 					}
@@ -340,9 +358,9 @@ window.addEventListener('pageshow', () => {
 			} else {
 				// blind videos
 				for (var i = 0; i < vidArr.length; i++) {
+					console.log(`${i}: ${vidArr[i].title}`);
 					if (vidArr[i].title === title) {
 						if (resultJson['banned']) {
-							console.log(`${i}: ${vidArr[i].title}`);
 							videos[i].style.display='none';
 							vidArr[i].banned = true;
 						}
