@@ -1,6 +1,8 @@
 # YouTubeBlinder
 
-열심히 해봅시다.
-폴더명, 파일명 전부다 소문자로 작성해주세요.
+### Installation
 
-Node.js v20.12.21
+!(/installation.png)
+##### [Extension Settings](chrome://extensions)
+##### Set a Developer Mode
+##### Load Unpacked
