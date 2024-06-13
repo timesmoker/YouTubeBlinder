@@ -361,8 +361,45 @@ window.addEventListener('pageshow', () => {
 					console.log(`${i}: ${vidArr[i].title}`);
 					if (vidArr[i].title === title) {
 						if (resultJson['banned']) {
-							videos[i].style.display='none';
 							vidArr[i].banned = true;
+
+							// contents 요소의 위치 스타일을 relative로 설정
+							videos[i].style.position = 'relative';
+
+							// 화면을 가릴 div 요소 생성
+							const blockerDiv = document.createElement('div');
+							blockerDiv.style.position = 'absolute';
+							blockerDiv.style.top = '0';
+							blockerDiv.style.left = '0';
+							blockerDiv.style.width = '100%';
+							blockerDiv.style.height = '100%';
+							blockerDiv.style.backgroundColor = '#181818'; // 다크 모드 배경색
+							blockerDiv.style.zIndex = '9999';
+							blockerDiv.style.color = 'white'; // 텍스트 색상
+							blockerDiv.style.display = 'flex';
+							blockerDiv.style.justifyContent = 'center';
+							blockerDiv.style.alignItems = 'flex-start'; // 텍스트를 상단에 위치
+							blockerDiv.style.fontSize = '200%'; // 글씨 크기 설정
+							blockerDiv.style.paddingTop = '10px'; // 상단 여백 설정
+							blockerDiv.style.opacity = 1;
+							const bannedList = resultJson['bannedTopics'];
+							var bannedText = '';
+							for (var j = 0; j < bannedList.length; j++) {
+								bannedText += `${bannedList[j]}`
+								if (j != bannedList.length - 1) {
+									bannedText += ', ';
+								}
+							}
+							console.log(bannedText);
+							blockerDiv.innerText = `주제: ${bannedText}\n에 의해 차단 됨`;
+							videos[i].appendChild(blockerDiv);
+							blockerDiv.addEventListener('click', function(event) {
+								if (event.target.style.opacity == 0) {
+									event.target.style.opacity = 1;
+								} else if (event.target.style.opacity == 1) {
+									event.target.style.opacity = 0;
+								}
+							})
 						}
 					}
 				}

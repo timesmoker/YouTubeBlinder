@@ -532,8 +532,12 @@ document.addEventListener('DOMContentLoaded', () => {
 							chrome.storage.local.set({'htmlContent': document.body.innerHTML}, function() {});
 
 						}
+<<<<<<< HEAD
 				// 	}
 >>>>>>> a6672ef (demo try)
+=======
+				// // 	}
+>>>>>>> aa8fa55 (demo try)
 				});
 				//////////////
 				// chrome.storage.local.get('keywordList', function(result) {
