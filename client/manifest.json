@@ -8,6 +8,7 @@
 		"open_in_tab": true
 	},
 	"permissions": [
+		"activeTab",
 		"scripting",
 		"storage",
 		"tabs",
@@ -25,7 +26,7 @@
 		"service_worker": "background.js"
 	},
     "web_accessible_resources": [{
-		"resources": ["/injected-script.js"],
+		"resources": ["/injected-script.js", "injected-script-2.js"],
 		"matches": ["*://*.youtube.com/*"]
     }],
     "content_scripts": [

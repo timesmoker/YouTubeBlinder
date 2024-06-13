@@ -83,15 +83,15 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-	console.log(info);
-	if (info.menuItemId === "sampleMenu") {
-		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-			var activeTab = tabs[0];
-			json = JSON.stringify({title: "", link: info.linkUrl});
-			chrome.tabs.sendMessage(activeTab.id, json, function(response) {
-				console.log("send tab rightClick");
-			});
-		});
+	chrome.windows.create({
+		url: '/popup/popup.html',
+		type: 'popup',
+		width: 400,
+		height: 300
+	});
+	if (info.linkUrl) {
+		console.log(info.linkUrl);
+		chrome.storage.local.set({"id": info.linkUrl.split('=')[1].split('&')[0]}, function() {});
 	}
 });
 
@@ -103,3 +103,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		sendResponse({status: 'Menu updated'});
 	}
 });
+
+chrome.tabs.query({}, function(tabs) {
+    for (let tab of tabs) {
+        if (tab.url.startsWith("https://www.youtube.com")) {
+            console.log(tab.url.includes('watch'));
+            let fileToInject = tab.url.includes('watch') ? 'injected-script-2.js' : 'injected-script.js';
+            chrome.scripting.executeScript({
+                target: {tabId: tab.id},
+                files: [fileToInject]
+            });
+        }
+    }
+});
+
