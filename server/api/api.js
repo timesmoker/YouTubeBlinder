@@ -6,7 +6,7 @@ import vision from '@google-cloud/vision';
 dotenv.config();
 
 // 환경변수 설정: 서비스 계정 키 파일 위치
-process.env.GOOGLE_APPLICATION_CREDENTIALS = 'key\\daring-octane-421708-fdef89be9b20.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS = 'daring-octane-421708-fdef89be9b20.json';
 
 // 클라이언트 생성
 const client = new vision.ImageAnnotatorClient();

@@ -3,10 +3,6 @@
 	"description": "Youtube Blinder",
 	"version": "1.0",
 	"manifest_version": 3,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dee3602 (popup and options sync)
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": true
@@ -17,32 +13,15 @@
 		"storage",
 		"tabs",
 		"unlimitedStorage",
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 		"contextMenus",
->>>>>>> c83af8f (right click event, direct options.html)
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback"
 	],
-=======
->>>>>>> 144f325 (get title and link)
-=======
-		"webRequest"
-=======
-		"declarativeNetRequest",
-		"declarativeNetRequestFeedback"
->>>>>>> 3fcc778 (popup)
-	],
->>>>>>> dee3602 (popup and options sync)
     "action": {
         "default_popup": "popup/popup.html",
         "default_title": "Youtube Blinder",
         "default_icon": "icon.png"
     },
-<<<<<<< HEAD
-<<<<<<< HEAD
 	"background": {
 		"service_worker": "background.js"
 	},
@@ -53,42 +32,8 @@
     "content_scripts": [
 		{
 			"matches": ["*://*.youtube.com/*"],
-<<<<<<< HEAD
 			"js":  ["/contentScripts/content.js"],
 			"run_at": "document_idle"
 		}
-<<<<<<< HEAD
-	],
-	"web_accessible_resources": [
-		{
-			"resources": ["ytblock.html"],
-			"matches": ["<all_urls>"]
-		}
-=======
-=======
-	"background": {
-		"script": [ "background.js" ]
-	},
->>>>>>> 619b15b (15:12 cannot connect)
-    "content_scripts": [
-		{
-			"matches": ["<all_urls>"],
-			"js":  ["/contentScripts/content.js"],
-			"run_at": "document_start"
-		}
->>>>>>> 144f325 (get title and link)
-=======
-			"js":  ["/contentScripts/content.js"],
-			"run_at": "document_start"
-		}
-	],
-	"web_accessible_resources": [
-		{
-			"resources": ["ytblock.html"],
-			"matches": ["<all_urls>"]
-		}
->>>>>>> 3fcc778 (popup)
-=======
->>>>>>> 80ad9ef (client latest)
 	]
 }

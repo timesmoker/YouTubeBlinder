@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Extension Options</title>
-<<<<<<< HEAD
-<<<<<<< HEAD
     <style>
         /* 텍스트 필드 스타일링 */
         #textField {
@@ -30,39 +28,6 @@
             position: relative;
         }
         .button-container {
-=======
-	<style>
-=======
-    <style>
->>>>>>> d244c07 (draft UI)
-        /* 텍스트 필드 스타일링 */
-        #textField {
-            width: 600px;   /* 너비 설정 */
-            height: 20px;   /* 높이 설정 */
-            padding: 5px;   /* 내부 여백 추가 */
-            font-size: 16px; /* 폰트 크기 */
-        }
-        .form {
-            display: flex;      /* Flexbox 레이아웃 적용 */
-            align-items: center; /* 세로 중앙 정렬 */
-            gap: 10px;           /* 요소들 사이의 간격 설정 */
-        }
-        .form label {
-            margin-right: 10px; /* 레이블과 입력 필드 사이 간격 */
-        }
-        .form input {
-            flex-grow: 1;       /* 입력 필드가 남은 공간을 모두 차지하도록 설정 */
-        }
-        /* 슬라이더 스타일링 */
-        .slider {
-            width: 600px;   /* 너비 설정 */
-        }
-        .button-container {
-<<<<<<< HEAD
-            display: flex; /* 플렉스박스 레이아웃 사용 */
->>>>>>> dee3602 (popup and options sync)
-=======
->>>>>>> d244c07 (draft UI)
             flex-wrap: nowrap; /* 버튼들이 다음 줄로 넘어가지 않고 한 줄에 표시 */
             overflow-x: auto; /* 수평 스크롤 가능 */
             width: 100%; /* 버튼 영역의 너비를 최대로 설정 */
@@ -77,27 +42,12 @@
         }
         .oval-button {
             border: none;  /* 테두리 제거 */
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-            color: white;  /* 글자색 */
->>>>>>> dee3602 (popup and options sync)
-=======
->>>>>>> d244c07 (draft UI)
             padding: 10px 20px;  /* 상하 10px, 좌우 20px 패딩 */
             text-decoration: none;  /* 텍스트 밑줄 제거 */
             font-size: 16px;  /* 글자 크기 */
             margin: 4px 2px;  /* 마진 추가 */
             cursor: pointer;  /* 포인터 커서 사용 */
-<<<<<<< HEAD
-<<<<<<< HEAD
             /* border-radius: 20px;  /* 둥근 모서리 생성 */
-=======
-            border-radius: 20px;  /* 둥근 모서리 생성 */
->>>>>>> dee3602 (popup and options sync)
-=======
-            /* border-radius: 20px;  /* 둥근 모서리 생성 */
->>>>>>> d244c07 (draft UI)
             transition: background 0.3s, color 0.3s;  /* 배경과 글자색 애니메이션 */
             flex: 0 0 auto; /* 버튼이 컨텐츠 크기에 맞춰 크기가 조정되지 않고, 축소되거나 확장도 하지 않음 */
             min-width: 80px; /* 버튼의 최소 너비 */
@@ -110,13 +60,8 @@
             background-color: #CBCBCB;
         }
         .red-oval {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
             background-color: #ED4A55;
             color: white;
->>>>>>> a6672ef (demo try)
             /* background-color: #FF0000;  버튼의 배경색 */
         }
         .oval-button:hover {
@@ -157,38 +102,6 @@
             box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
         }
         .toggle-button.active {
-<<<<<<< HEAD
-            background-color: white; /* 활성화 상태 색상 변경 */
-            color: black;
-=======
-            background-color: #FF0000;  /* 버튼의 배경색 */
-        }
-        .oval-button:hover {
-            background-color: #45a049;  /* 호버 시 배경색 변경 */
->>>>>>> dee3602 (popup and options sync)
-=======
-            /* background-color: #FF0000;  버튼의 배경색 */
-        }
-        .oval-button:hover {
-            /* background-color: #45a049;  호버 시 배경색 변경 */
-        }
-        .toggle-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-            outline: none;
-            color: white;
-            background-color: black;
-            border: none;
-            border-radius: 5px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-        }
-        .toggle-button.active {
-            background-color: white; /* 활성화 상태 색상 변경 */
-            color: black;
->>>>>>> d244c07 (draft UI)
-=======
             background-color: #ED4A55;
             color: white;
         }
@@ -257,32 +170,14 @@
         }
         .slider-switch.round:before {
             border-radius: 50%;
->>>>>>> a6672ef (demo try)
         }
     </style>
 </head>
 <body>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> d244c07 (draft UI)
-    <h1>Extension Settings</h1>
-<<<<<<< HEAD
-    <label for="someSetting">Some Setting:</label>
-    <input type="checkbox" id="someSetting" name="someSetting">
-
-<<<<<<< HEAD
-=======
->>>>>>> 80ad9ef (client latest)
-    <div>
-        <h2>YouTubeBlinder</h2>
-=======
     <h1>YouTube Blinder Setting</h1>
     <hr>
     <div style="display: flex; flex-direction: row-reverse;">
         <button class="oval-button get-adjacent">키워드 받아오기</button>
->>>>>>> a6672ef (demo try)
         <button class="oval-button red-oval" id="YouTubeButton">유튜브</button>
     </div>
     <hr>
@@ -293,57 +188,6 @@
     <div id="buttons-area">
         <button type="button" class="oval-button red-oval">추천 키워드</button>
     </div>
-<<<<<<< HEAD
-=======
-=======
->>>>>>> d244c07 (draft UI)
-    <div>
-        <h2>YouTubeBlinder</h2>
-        <br>
-        <h4>추천 키워드</h4>
-    </div>
-    <div class="form">
-        <input type="text" id="textField" name="name" placeholder="키워드를 입력하세요">
-        <button type="button" id="cloneButton">+</button>
-    </div>
-    <div id="buttons-area">
-        <div class="keyword-container con1">
-            <hr>
-            <div class="slider-container">
-                <button class="container-minus">-</button>
-                <button class="oval-button red-oval">새 버튼</button>
-                <input type="range" class="slider" min="1" max="100" value="50">
-                <span class="sliderValue">50</span>
-            </div>
-            <div class="button-container">
-                <button class="oval-button word-plus">+</button>
-            </div>
-        </div>
-        <div class="keyword-container con2">
-            <hr>
-            <div class="slider-container">
-                <button class="container-minus">-</button>
-                <button class="oval-button red-oval">새 버튼</button>
-                <input type="range" class="slider" min="1" max="100" value="50">
-                <span class="sliderValue">50</span>
-            </div>
-            <div class="button-container">
-                <button class="oval-button word-plus">+</button>
-            </div>
-    </div>
-<<<<<<< HEAD
-    <form id="simpleForm">
-        <label for="textField">키워드를 입력하세요:</label>
-        <input type="text" id="textField" name="name"><br><br>
-
-        <button type="button" id="btnSubmit">적용</button>
-    </form>
->>>>>>> dee3602 (popup and options sync)
-=======
->>>>>>> d244c07 (draft UI)
-    <script src="options.js"></script>
-=======
     <script src="./options.js"></script>
->>>>>>> 80ad9ef (client latest)
 </body>
 </html>
