@@ -34,8 +34,8 @@ def initialize_nlp():
 def keep_korean(text):
     # 한글만 남김
     text = unicodedata.normalize('NFC', text)
-    korean_pattern = re.compile('[^가-힣\s]+')
-    # 한글 범위 외의 모든 문자를 공백으로 대체하여 제거
+    korean_pattern = re.compile('[^가-힣a-zA-Z0-9\s]+')
+    # 한글, 영어, 숫자 범위 외의 모든 문자를 공백으로 대체하여 제거
     text = korean_pattern.sub('', text)
     # 중복 공백을 제거
     text = re.sub(r'\s+', ' ', text)
@@ -416,11 +416,10 @@ def adjacency():
             else:
                 break
 
-        if analyzed_text and analyzed_text[0] != '' and analyzed_text[0] not in selected_topics :
-            closest_word = (closest_word[0], analyzed_text[0] if analyzed_text else '')
+        if analyzed_text and analyzed_text[0] != '' and (not selected_topics or all(analyzed_text[0] not in sublist[1] for sublist in selected_topics) and analyzed_text[0] != topic):
+            closest_word = (closest_word[0], analyzed_text[0])
             selected_topics.append(closest_word)
             print(f"Selected topic: " + closest_word[1])
-
 
     response = {
         "path": '/topic/adjacency',
